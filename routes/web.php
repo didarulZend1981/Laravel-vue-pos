@@ -16,6 +16,7 @@ use App\Http\Controllers\SaleInvoiceController;
 use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Middleware\tokenVerificationMiddleware;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\StockController;
 
 //home page
 Route::get('/', function () {
@@ -135,6 +136,26 @@ Route::group(['prefix' => '/report', 'middleware' => tokenVerificationMiddleware
 //======================Dashboard Management=====================//
 Route::group(['prefix' => 'dashboard', 'middleware' => tokenVerificationMiddleware::class], function () {
     Route::get('/', [DashboardController::class, 'showDashboard'])->name('show.dashboard');
+});
+
+
+// //======================Dashboard Management=====================//
+// Route::group(['prefix' => 'stock-report', 'middleware' => tokenVerificationMiddleware::class], function () {
+//     // Route::get('/', [DashboardController::class, 'showDashboard'])->name('show.stock-report');
+//     // Route::inertia('/stock-report', 'StockReport/Index');
+//     Route::inertia('/', '/Dashboard/StockReport/Index')->name('stock.report');
+//     // return Inertia::render
+// });
+
+
+
+
+
+//========================Report Management=====================//
+Route::group(['prefix' => '/stock', 'middleware' => tokenVerificationMiddleware::class], function () {
+    Route::get('/', [StockController::class, 'StockPage'])->name('stock.page');
+    Route::post('/stocks', [StockController::class, 'stocksReport'])->name('stocks.report');
+    // Route::get('/purchase/{FormDate}/{ToDate}', [ReportController::class, 'purchaseReport'])->name('purchase.report');
 });
 
 //========================404 Page Management=====================//

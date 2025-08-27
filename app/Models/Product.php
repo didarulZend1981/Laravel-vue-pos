@@ -26,5 +26,15 @@ class Product extends Model
         return $this->belongsTo(User::class);
     }
 
+    //  return $this->hasMany(Product::class);
+    public function purchases(){
+             return $this->hasMany(PurchaseInvoiceProducts::class);
+    }
+
+        public function sales(){
+            return $this->hasMany(SaleInvoiceProducts::class);
+        }
+
+
     protected $hidden = ['created_at', 'updated_at'];
 }

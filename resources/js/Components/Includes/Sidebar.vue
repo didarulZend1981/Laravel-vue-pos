@@ -203,6 +203,7 @@ onUnmounted(() => {
             </div>
         </li>
 
+        
         <!-- invoice -->
         <li class="nav-item"
             :class="{ 'active': ['/sale-invoice/list', '/purchase-invoice/list'].includes($page.url) }">
@@ -227,6 +228,20 @@ onUnmounted(() => {
             <Link class="nav-link" href="/report">
             <i class="fa fa-file icon"></i>
             <span>Report</span></Link>
+        </li>
+
+
+
+        <!-- <li class="nav-item" :class="{ 'active': $page.url === '/stock-report' }">
+            <Link class="nav-link" href="/stock-report">
+            <i class="fa fa-file icon"></i>
+            <span>stock</span></Link>
+        </li> -->
+
+        <li class="nav-item" :class="{ 'active': $page.url === '/stock' }">
+            <Link class="nav-link" href="/stock">
+            <i class="fa fa-file icon"></i>
+            <span>Stock</span></Link>
         </li>
     </ul>
 </template>

@@ -28,7 +28,7 @@ class PurchaseInvoiceController extends Controller
     {
         $user_id = $request->header('id');
         $suppliers = Supplier::where('user_id', $user_id)->orderBy('id', 'desc')->get();
-        $products = Product::where('user_id', $user_id)->where('stock', '>', 0)->get();
+        $products = Product::where('user_id', $user_id)->where('stock', '>=', 0)->get();
 
         return Inertia::render('Dashboard/Purchase/PurchasePage', [
             'suppliers' => $suppliers,
@@ -272,6 +272,26 @@ class PurchaseInvoiceController extends Controller
         DB::beginTransaction();
 
         try {
+            $purchase_invoice_product = PurchaseInvoiceProducts::where('purchase_invoice_id', $id)
+                ->where('user_id', $user_id)
+                ->first();
+
+            // Check if the purchase invoice product exists
+            if ($purchase_invoice_product) {
+                $stock = $purchase_invoice_product->qty;
+
+                // Retrieve the corresponding product
+                $product = Product::where('id', $purchase_invoice_product->product_id)
+                    ->where('user_id', $user_id)
+                    ->first();
+
+                if ($product) {
+                    // Deduct stock based on purchase invoice product quantity
+                    $product->stock = $product->stock - $stock;
+                    $product->save(); // Update stock in database
+                }
+            }
+
             $purchase_invoice_product = PurchaseInvoiceProducts::where('purchase_invoice_id', $id)->where('user_id', $user_id)->delete();
             $purchase_invoice = PurchaseInvoice::where('id', $id)->where('user_id', $user_id)->delete();
 
