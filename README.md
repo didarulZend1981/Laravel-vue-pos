@@ -17,3 +17,5 @@
 - 💰 **Invoice Generation** – Print and download invoices for create and sale
 - 📊 **Sales Reports** – Track sales and earnings
 - 🛄 **Purchase Reports** – Track purchase and earnings
+- 📦 **Stock Reports** – Stock Information
+ 
