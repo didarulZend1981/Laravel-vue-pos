@@ -1,4 +1,6 @@
 <script setup>
+
+// 1=admin,2=sale,3=purchese
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link,useForm } from '@inertiajs/vue3';
 import SidebarDropdown from './Sidebar/SidebarDropdown.vue';
@@ -93,9 +95,7 @@ onUnmounted(() => {
         <div class="sidebar-brand-text mx-3"> POS
 
 
-            <span class="mr-2 d-none d-lg-inline text-gray-600 small">
-                        {{ profileData.first_name }}- {{ profileData.role }}
-                    </span>
+
         </div>
         </Link>
 
@@ -106,6 +106,7 @@ onUnmounted(() => {
 
 
         <SidebarItem
+        v-if="profileData.role == 1|| profileData.role == 2|| profileData.role == 3"
         label="Dashboard"
         icon="fas fa-fw fa-tachometer-alt icon"
         href="/dashboard"
@@ -117,8 +118,10 @@ onUnmounted(() => {
         <!-- cutomer -->
 
 
+        <!-- admin profileData.role==1-->
 
          <SidebarDropdown
+            v-if="profileData.role == 1 || profileData.role == 2"
             title="Customer"
             icon="fa fa-users icon"
             collapseId="collapseOne"
@@ -135,6 +138,7 @@ onUnmounted(() => {
         <!-- supplier -->
 
           <SidebarDropdown
+            v-if="profileData.role == 1 || profileData.role == 3"
             title="Supplier"
             icon="fa fa-user-plus icon"
             collapseId="collapseTwo"
@@ -157,6 +161,7 @@ onUnmounted(() => {
 
 
         <SidebarDropdown
+            v-if="profileData.role == 1 || profileData.role == 3"
             title="Category"
             icon="fa fa-bars"
             collapseId="collapseThree"
@@ -171,6 +176,7 @@ onUnmounted(() => {
         <!-- brand or company -->
 
             <SidebarDropdown
+                    v-if="profileData.role == 1 || profileData.role == 3"
                     title="Brand"
                     icon="fa fa-bold icon"
                     collapseId="collapseFour"
@@ -189,6 +195,7 @@ onUnmounted(() => {
 
 
         <SidebarDropdown
+            v-if="profileData.role == 1 || profileData.role == 3"
             title="Product"
             icon="fa fa-cubes icon"
             collapseId="collapseFive"
@@ -204,6 +211,7 @@ onUnmounted(() => {
         <!-- sale and custom sale generate -->
 
         <SidebarDropdown
+            v-if="profileData.role == 1 || profileData.role == 2"
             title="Sale Generate"
             icon="fa fa-dollar-sign icon"
             collapseId="collapseSix"
@@ -223,6 +231,7 @@ onUnmounted(() => {
 
 
          <SidebarDropdown
+            v-if="profileData.role == 1"
             title="Purchase"
             icon="fa fa-shopping-cart icon"
             collapseId="collapseSeven"
@@ -232,6 +241,13 @@ onUnmounted(() => {
             { label: 'Custom purchase', href: '/sale-invoice/custom' }
 
             ]"
+        />
+
+        <SidebarItem
+            v-if="profileData.role == 3"
+            label="Purchase"
+            icon="fa fa-shopping-cart icon"
+            href="/purchase-invoice"
         />
 
 
@@ -245,6 +261,7 @@ onUnmounted(() => {
 
 
           <SidebarDropdown
+            v-if="profileData.role == 1"
             title="Invoice"
             icon="fa fa-table icon"
             collapseId="collapseEight"
@@ -259,12 +276,22 @@ onUnmounted(() => {
 
 
 
+        <SidebarItem
+            v-if="profileData.role == 2"
+            label="Sale Invoice"
+            icon="fa fa-table icon"
+            href="/sale-invoice/list"
+        />
+
+
+
 
 
 
         <!-- report -->
 
           <SidebarItem
+            v-if="profileData.role == 1 || profileData.role == 2 || profileData.role == 3"
             label="Report"
             icon="fa fa-file icon"
             href="/report"
@@ -275,9 +302,10 @@ onUnmounted(() => {
 
 
 
-          <SidebarItem
+        <SidebarItem
+          v-if="profileData.role == 1 || profileData.role == 2 || profileData.role == 3"
         label="Stock"
-        icon="fa fa-file icon"
+        icon="fa fa-box icon"
         href="/stock"
         />
     </ul>
