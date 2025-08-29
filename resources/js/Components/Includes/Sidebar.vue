@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { Link,useForm } from '@inertiajs/vue3';
+import SidebarDropdown from './Sidebar/SidebarDropdown.vue';
+import SidebarItem from './Sidebar/SidebarItem.vue';
 
 const isSidebarToggled = ref(false);
 
@@ -85,6 +87,8 @@ onUnmounted(() => {
             <i class="fa fa-calculator"></i>
         </div>
 
+
+
         <!-- logo -->
         <div class="sidebar-brand-text mx-3"> POS
 
@@ -99,185 +103,183 @@ onUnmounted(() => {
         <hr class="sidebar-divider my-0">
 
         <!-- Dashboard -->
-        <li class="nav-item" :class="{ 'active': $page.url === '/dashboard' }">
-            <Link class="nav-link" href="/dashboard">
-            <i class="fas fa-fw fa-tachometer-alt icon"></i>
-            <span>Dashboard</span></Link>
-        </li>
+
+
+        <SidebarItem
+        label="Dashboard"
+        icon="fas fa-fw fa-tachometer-alt icon"
+        href="/dashboard"
+        />
+
+
+
 
         <!-- cutomer -->
-        <li class="nav-item" :class="{ 'active': ['/customer', '/customer/save'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseOne"
-                aria-expanded="true" aria-controls="collapseOne">
-                <i class="fa fa-users icon"></i>
-                <span>Customer</span>
-            </a>
-            <div id="collapseOne" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/customer' }" href="/customer">
-                    Customer List</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/customer/save' }"
-                        href="/customer/save"> Customer Save </Link>
-                </div>
-            </div>
-        </li>
+
+
+
+         <SidebarDropdown
+            title="Customer"
+            icon="fa fa-users icon"
+            collapseId="collapseOne"
+            :activeUrls="['/customer', '/customer/save']"
+            :links="[
+            { label: 'Customer List', href: '/customer' },
+            { label: 'Customer Save', href: '/customer/save' },
+             ]"
+        />
+
+
+
 
         <!-- supplier -->
-        <li class="nav-item" :class="{ 'active': ['/supplier', '/supplier/save'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                aria-expanded="true" aria-controls="collapseTwo">
-                <i class="fa fa-user-plus icon"></i>
-                <span>Supplier</span>
-            </a>
-            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/supplier' }" href="/supplier">
-                    Supplier List</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/supplier/save' }"
-                        href="/supplier/save"> Supplier Save </Link>
-                </div>
-            </div>
-        </li>
 
-        <!-- category -->
-        <li class="nav-item"
-            :class="{ 'active': ['/category', '/category/save', '/category/all'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseThree"
-                aria-expanded="true" aria-controls="collapseThree">
-                <i class="fa fa-bars icon"></i>
-                <span>Category</span>
-            </a>
-            <div id="collapseThree" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/category' }" href="/category">
-                    Category List</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/category/save' }"
-                        href="/category/save">
-                    Category Save</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/category/all' }"
-                        href="/category/all">
-                    All Categories</Link>
-                </div>
-            </div>
-        </li>
+          <SidebarDropdown
+            title="Supplier"
+            icon="fa fa-user-plus icon"
+            collapseId="collapseTwo"
+            :activeUrls="['/supplier', '/supplier/save']"
+            :links="[
+            { label: 'supplier List', href: '/supplier' },
+            { label: 'Supplier Save', href: '/supplier/save' }
+
+            ]"
+        />
+
+        <!-- Category Dropdown -->
+
+
+
+
+
+
+
+
+
+        <SidebarDropdown
+            title="Category"
+            icon="fa fa-bars"
+            collapseId="collapseThree"
+            :activeUrls="['/category', '/category/save', '/category/all']"
+            :links="[
+            { label: 'Category List', href: '/category' },
+            { label: 'Category Save', href: '/category/save' },
+            { label: 'All Categories', href: '/category/all' }
+            ]"
+        />
 
         <!-- brand or company -->
-        <li class="nav-item" :class="{ 'active': ['/brand', '/brand/save'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFour"
-                aria-expanded="true" aria-controls="collapseFour">
-                <i class="fa fa-bold icon"></i>
-                <span>Brand</span>
-            </a>
-            <div id="collapseFour" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/brand' }" href="/brand">
-                    Brand List</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/brand/save' }" href="/brand/save">
-                    Brand Save</Link>
-                </div>
-            </div>
-        </li>
+
+            <SidebarDropdown
+                    title="Brand"
+                    icon="fa fa-bold icon"
+                    collapseId="collapseFour"
+                    :activeUrls="['/brand', '/brand/save']"
+                    :links="[
+                    { label: 'Brand List', href: '/brand' },
+                    { label: 'Brand Save', href: '/brand/save' }
+                    ]"
+           />
+
+
+
 
         <!-- product -->
-        <li class="nav-item" :class="{ 'active': ['/product', '/product/save', 'product/all'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseFive"
-                aria-expanded="true" aria-controls="collapseFive">
-                <i class="fa fa-cubes icon"></i>
-                <span>Product</span>
-            </a>
-            <div id="collapseFive" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/product' }" href="/product">
-                    Product List</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/product/save' }"
-                        href="/product/save">Save
-                    Product</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/product/all' }" href="/product/all">
-                    All
-                    Product</Link>
-                </div>
-            </div>
-        </li>
+
+
+
+        <SidebarDropdown
+            title="Product"
+            icon="fa fa-cubes icon"
+            collapseId="collapseFive"
+            :activeUrls="['/product', '/product/save', '/product/all']"
+            :links="[
+            { label: 'product List', href: '/product' },
+            { label: 'Product Save', href: '/product/save' },
+            { label: 'All Product', href: '/product/all' }
+            ]"
+        />
+
 
         <!-- sale and custom sale generate -->
-        <li class="nav-item" :class="{ 'active': ['/sale-invoice', '/sale-invoice/custom'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSix"
-                aria-expanded="true" aria-controls="collapseSix">
-                <i class="fa fa-dollar-sign icon"></i>
-                <span>Sale Generate</span>
-            </a>
-            <div id="collapseSix" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/sale-invoice' }"
-                        href="/sale-invoice">
-                    Create Sale</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/sale-invoice/custom' }"
-                        href="/sale-invoice/custom">
-                    Custom Sale</Link>
-                </div>
-            </div>
-        </li>
+
+        <SidebarDropdown
+            title="Sale Generate"
+            icon="fa fa-dollar-sign icon"
+            collapseId="collapseSix"
+            :activeUrls="['/sale-invoice', '/sale-invoice/custom']"
+            :links="[
+            { label: 'Create Sale', href: '/sale-invoice' },
+            { label: 'Custom Sale', href: '/sale-invoice/custom' }
+
+            ]"
+        />
+
+
+
+
 
         <!-- Purchase and custom purchase generate -->
-        <li class="nav-item"
-            :class="{ 'active': ['/purchase-invoice', '/purchase-invoice/custom'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSeven"
-                aria-expanded="true" aria-controls="collapseSeven">
-                <i class="fa fa-shopping-cart icon"></i>
-                <span>Purchase</span>
-            </a>
-            <div id="collapseSeven" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/purchase-invoice' }"
-                        href="/purchase-invoice">
-                    Create purchase</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/purchase-invoice/custom' }"
-                        href="/purchase-invoice/custom">
-                    Custom purchase</Link>
-                </div>
-            </div>
-        </li>
+
+
+         <SidebarDropdown
+            title="Purchase"
+            icon="fa fa-shopping-cart icon"
+            collapseId="collapseSeven"
+            :activeUrls="['/purchase-invoice', '/purchase-invoice/custom']"
+            :links="[
+            { label: 'Create purchase', href: '/purchase-invoice' },
+            { label: 'Custom purchase', href: '/sale-invoice/custom' }
+
+            ]"
+        />
+
+
+
+
+
+
 
 
         <!-- invoice -->
-        <li class="nav-item"
-            :class="{ 'active': ['/sale-invoice/list', '/purchase-invoice/list'].includes($page.url) }">
-            <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseEight"
-                aria-expanded="true" aria-controls="collapseEight">
-                <i class="fa fa-table icon"></i>
-                <span>Invoice</span>
-            </a>
-            <div id="collapseEight" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/sale-invoice/list' }"
-                        href="/sale-invoice/list">
-                    Sale Invoice</Link>
-                    <Link class="collapse-item" :class="{ 'active': $page.url === '/purchase-invoice/list' }"
-                        href="/purchase-invoice/list">Purchase Invoice</Link>
-                </div>
-            </div>
-        </li>
 
-        <!-- report -->
-        <li class="nav-item" :class="{ 'active': $page.url === '/report' }">
-            <Link class="nav-link" href="/report">
-            <i class="fa fa-file icon"></i>
-            <span>Report</span></Link>
-        </li>
+
+          <SidebarDropdown
+            title="Invoice"
+            icon="fa fa-table icon"
+            collapseId="collapseEight"
+            :activeUrls="['/sale-invoice/list', '/purchase-invoice/list']"
+            :links="[
+            { label: 'Sale Invoice', href: '/sale-invoice/list' },
+            { label: 'Purchase Invoice', href: '/purchase-invoice/list' }
+
+            ]"
+        />
+
+
+
+
 
 
 
-        <!-- <li class="nav-item" :class="{ 'active': $page.url === '/stock-report' }">
-            <Link class="nav-link" href="/stock-report">
-            <i class="fa fa-file icon"></i>
-            <span>stock</span></Link>
-        </li> -->
+        <!-- report -->
 
-        <li class="nav-item" :class="{ 'active': $page.url === '/stock' }">
-            <Link class="nav-link" href="/stock">
-            <i class="fa fa-file icon"></i>
-            <span>Stock</span></Link>
-        </li>
+          <SidebarItem
+            label="Report"
+            icon="fa fa-file icon"
+            href="/report"
+        />
+
+
+
+
+
+
+          <SidebarItem
+        label="Stock"
+        icon="fa fa-file icon"
+        href="/stock"
+        />
     </ul>
 </template>
 
