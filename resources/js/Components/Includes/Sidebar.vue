@@ -1,8 +1,37 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Link } from '@inertiajs/vue3';
+import { Link,useForm } from '@inertiajs/vue3';
 
 const isSidebarToggled = ref(false);
+
+const profileData = useForm({
+    first_name: '',
+    last_name: '',
+    email: '',
+    mobile: '',
+    address: '',
+    // image: '',
+});
+
+async function fetchProfileData() {
+    try {
+        const response = await axios.get(route('get.profile'));
+        // console.log(response)
+        if (response.data.status === 'success') {
+            // profileData.value = response.data.user;
+            Object.assign(profileData, response.data.user);
+        }
+    } catch (error) {
+        errorToast('Error fetching profile !!');
+    }
+}
+
+onMounted(() => {
+    fetchProfileData();
+});
+
+
+
 
 const toggleSidebar = () => {
     isSidebarToggled.value = !isSidebarToggled.value;
@@ -57,7 +86,13 @@ onUnmounted(() => {
         </div>
 
         <!-- logo -->
-        <div class="sidebar-brand-text mx-3"> POS </div>
+        <div class="sidebar-brand-text mx-3"> POS
+
+
+            <span class="mr-2 d-none d-lg-inline text-gray-600 small">
+                        {{ profileData.first_name }}- {{ profileData.role }}
+                    </span>
+        </div>
         </Link>
 
         <!-- Divider -->
@@ -203,7 +238,7 @@ onUnmounted(() => {
             </div>
         </li>
 
-        
+
         <!-- invoice -->
         <li class="nav-item"
             :class="{ 'active': ['/sale-invoice/list', '/purchase-invoice/list'].includes($page.url) }">

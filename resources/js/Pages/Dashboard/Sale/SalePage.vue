@@ -150,6 +150,18 @@ const customerPick = ref({
     id: "",
 });
 
+const pickWalk = (id) => {
+    const selectedCustomer = customers.find(customer => customer.id === id);
+    if (selectedCustomer) {
+        customerPick.value = {
+            name: selectedCustomer.name,
+            phone: selectedCustomer.phone,
+            address: selectedCustomer.address,
+            id: selectedCustomer.id,
+        };
+    }
+};
+
 const pickCustomer = (id) => {
     const selectedCustomer = customers.find(customer => customer.id === id);
     if (selectedCustomer) {
@@ -219,7 +231,14 @@ async function generateInvoice() {
                                 <div>
                                     <h5 class="text-info font-weight-bold">Create sale for big/previous customer</h5>
                                 </div>
+
+                                 <button class="btn btn-sm btn-outline-success" @click="pickWalk(id=1)">
+                                               walk Customer <i class="fa fa-plus"></i>
+                                            </button>
+
                                 <div>
+
+
                                     <Link href="/sale-invoice/custom" class="btn btn-sm btn-info">Create custom sale
                                     </Link>
                                 </div>
