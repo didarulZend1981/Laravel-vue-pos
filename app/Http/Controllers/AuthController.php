@@ -19,14 +19,30 @@ class AuthController extends Controller
 {
     //===========================registraion management=====================//
     //registraion page
-    public function showSignUp()
-    {
+    public function showSignUp(){
         return Inertia::render('Auth/RegistrationPage');
     }
 
+    public function showUser(Request $request){
+        $users = User::orderBy('id', 'desc')->get();
+        return Inertia::render('Dashboard/User/UserPage', ['users' => $users]);
+    }
+
+    //==========================show User create page=================//
+    public function showSaveUser(Request $request){
+        $id = $request->query('id');
+        $user = User::where('id', $id)->first();
+
+        return Inertia::render('Dashboard/User/UserSavePage', [
+            'user' => $user, // Pass brand as key-value pair
+        ]);
+    }
+
     //registraion
-    public function signUp(Request $request)
-    {
+    public function signUp(Request $request){
+        // dd($request->all());
+        // $check=!$request->file('image')?'null':'a';
+        // dd($check);
         $request->validate([
             'first_name' => 'required|min:4|max:50',
             'last_name' => 'required|alpha|min:4|max:50',
@@ -38,6 +54,7 @@ class AuthController extends Controller
         ]);
 
         try {
+
             $image_url = null;
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
@@ -45,23 +62,44 @@ class AuthController extends Controller
                 $image_url = $image->storeAs('user', $imageNameToStore, 'public');
             }
 
+            $check=!$request->file('image')?NULL:$imageNameToStore;
             // Create the user
             User::create([
                 'first_name' => $request->input('first_name'),
                 'last_name' => $request->input('last_name'),
                 'email' => $request->input('email'),
+                'role' => $request->input('role'),
                 'mobile' => $request->input('mobile'),
                 'address' => $request->input('address'),
                 'password' => bcrypt($request['password']),
-                'image' => $image_url,
+                'image' => $check,
             ]);
 
             $data = ['message' => 'Registration successful !!', 'status' => true, 'code' => 201];
-            return redirect()->route('signIn.page')->with($data);
+            return redirect()->route('user.page')->with($data);
         } catch (Exception $e) {
             $data = ['message' => 'Registration failed !!', 'status' => false, 'code' => 400];
-            return redirect()->route('signIn.page')->with($data);
+            return redirect()->route('user.page')->with($data);
         }
+    }
+
+    //====================role update====================
+
+    public function updateRole(Request $request, $id){
+        $user = User::findOrFail($id);
+
+        // Validate the role input
+        $request->validate([
+            'role' => 'required|in:1,2,3', // Only allow specific roles
+        ]);
+
+   
+        $user->role = $request->role;
+        $user->save();
+
+        $data = ['message' => 'Role updated successfully !!', 'status' => true, 'code' => 201];
+
+        return redirect()->route('user.page')->with($data);
     }
 
     //================================login management========================//
@@ -78,15 +116,15 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required|string|min:8',
         ]);
-    
+
         $user = User::where('email', $request->input('email'))->first();
-    
+
         if ($user && Hash::check($request->input('password'), $user->password)) {
             // Password match
             $token = JWTToken::createToken($request->input('email'), $user->id);
-    
+
             $data = ['message' => 'Login successful', 'status' => true, 'code' => 200];
-    
+
             return redirect()
                 ->route('show.dashboard')
                 ->with($data)

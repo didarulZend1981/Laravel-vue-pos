@@ -114,6 +114,19 @@ onUnmounted(() => {
 
 
 
+        <!-- brand or company -->
+
+            <SidebarDropdown
+                    v-if="profileData.role == 1"
+                    title="User"
+                    icon="fa fa-bold icon"
+                    collapseId="collapseFour"
+                    :activeUrls="['/user']"
+                    :links="[
+                    { label: 'user List', href: '/user' }
+
+                    ]"
+           />
 
         <!-- cutomer -->
 

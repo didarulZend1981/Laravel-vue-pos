@@ -20,7 +20,7 @@ use App\Http\Controllers\StockController;
 
 //home page
 Route::get('/', function () {
-    return Inertia::render('HomePage');
+    // return Inertia::render('HomePage');
 });
 
 //======================Registration Management=====================//
@@ -28,7 +28,7 @@ Route::get('/sign-up', [AuthController::class, 'showSignUp'])->name('signup.page
 Route::post('/registration', [AuthController::class, 'signUp'])->name('signup');
 
 //======================Login Management=====================//
-Route::get('/sign-in', [AuthController::class, 'showSignIn'])->name('signIn.page');
+Route::get('/', [AuthController::class, 'showSignIn'])->name('signIn.page');
 Route::post('/login', [AuthController::class, 'signIn'])->name('signIn');
 
 //======================OTP management =====================//
@@ -156,6 +156,27 @@ Route::group(['prefix' => '/stock', 'middleware' => tokenVerificationMiddleware:
     Route::get('/', [StockController::class, 'StockPage'])->name('stock.page');
     Route::post('/stocks', [StockController::class, 'stocksReport'])->name('stocks.report');
     // Route::get('/purchase/{FormDate}/{ToDate}', [ReportController::class, 'purchaseReport'])->name('purchase.report');
+});
+
+
+//======================User Management=====================//
+Route::group(['prefix' => 'user', 'middleware' => tokenVerificationMiddleware::class], function () {
+
+     Route::get('/', [AuthController::class, 'showUser'])->name('user.page');
+     Route::get('/save', [AuthController::class, 'showSaveUser'])->name('show.save.user');
+
+
+     Route::post('/store', [AuthController::class, 'signUp'])->name('store.user');
+    //  Route::post('/update', [BrandController::class, 'updateBrand'])->name('update.user');
+      Route::post('/update', [ProfileController::class, 'updateProfile'])->name('update.user');
+     Route::put('/user/{id}/update-role', [AuthController::class, 'updateRole'])->name('update.role');
+
+
+    // Route::get('/', [BrandController::class, 'showBrand'])->name('brand.page');
+    // Route::get('/save', [BrandController::class, 'showSaveBrand'])->name('show.save.brand');
+    // Route::post('/store', [BrandController::class, 'storeBrand'])->name('store.brand');
+    // Route::post('/update/{id}', [BrandController::class, 'updateBrand'])->name('update.brand');
+    // Route::delete('/delete/{id}', [BrandController::class, 'deleteBrand'])->name('delete.brand');
 });
 
 //========================404 Page Management=====================//
