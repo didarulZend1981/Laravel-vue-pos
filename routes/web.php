@@ -170,7 +170,7 @@ Route::group(['prefix' => 'user', 'middleware' => tokenVerificationMiddleware::c
     //  Route::post('/update', [BrandController::class, 'updateBrand'])->name('update.user');
       Route::post('/update', [ProfileController::class, 'updateProfile'])->name('update.user');
      Route::put('/user/{id}/update-role', [AuthController::class, 'updateRole'])->name('update.role');
-
+    Route::delete('/delete/{id}', [AuthController::class, 'deleteUser'])->name('delete.user');
 
     // Route::get('/', [BrandController::class, 'showBrand'])->name('brand.page');
     // Route::get('/save', [BrandController::class, 'showSaveBrand'])->name('show.save.brand');

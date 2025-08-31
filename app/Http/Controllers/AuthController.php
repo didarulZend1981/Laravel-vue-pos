@@ -93,13 +93,28 @@ class AuthController extends Controller
             'role' => 'required|in:1,2,3', // Only allow specific roles
         ]);
 
-   
+
         $user->role = $request->role;
         $user->save();
 
         $data = ['message' => 'Role updated successfully !!', 'status' => true, 'code' => 201];
 
         return redirect()->route('user.page')->with($data);
+    }
+
+    //=========================delete user=======================//
+    public function deleteUser(Request $request, $id){
+
+        // dd($user_id);
+        $user = User::where('id', $id)->delete();
+
+
+        if (!$user) {
+            $data = ['message' => 'User not found', 'status' => false, 'code' => 404];
+             return redirect()->route('user.page')->with($data);
+        }
+        $data = ['message' => 'User deleted successfully', 'status' => true, 'code' => 200];
+         return redirect()->route('user.page')->with($data);
     }
 
     //================================login management========================//

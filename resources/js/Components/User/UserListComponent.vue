@@ -14,7 +14,7 @@ const userId = ref(null); // Store selected user ID
 // Open Role Modal and pass user ID
 const openRoleModal = (id,currentRole) => {
   userId.value = id; // Store the user ID to update the role
-  selectedRole.value = 0;
+  selectedRole.value = currentRole;
   isRoleModalOpen.value = true;
 
 };
@@ -48,6 +48,7 @@ const Header = [
     { text: "image", value: "image" },
     { text: "User Name", value: "name" },
     { text: "Role", value: "role" },
+
     { text: "Email", value: "email" },
     { text: "mobile", value: "mobile" },
     { text: "address", value: "address" },
@@ -65,6 +66,7 @@ const Item = computed(() => {
         no: index + 1,
         name: users.first_name+' '+users.first_name,
         role: roleMap[users.role] || 'unknown',
+        roleNumber: users.role,
         email: users.email,
         mobile: users.mobile,
         address: users.address,
@@ -79,22 +81,22 @@ const searchValue = ref("");
 const searchField = ref(["name"]);
 
 // delete brand/company
-const deleteBrand = (id) => {
+const deleteUser = (id) => {
     loading.value = true;
-    if (confirm('Are you sure to delete this brand?')) {
-        router.delete(route('delete.brand', { id: id }), {
+    if (confirm('Are you sure to delete this user?')) {
+        router.delete(route('delete.user', { id: id }), {
             preserveScroll: true,
             onSuccess: () => {
                 loading.value = false;
                 if (page.props.flash.status === true) {
                     successToast(page.props.flash.message);
                 } else {
-                    errorToast(page.props.flash.message || 'Failed to delete brand!');
+                    errorToast(page.props.flash.message || 'Failed to delete user!');
                 }
             },
             onError: (errors) => {
                 loading.value = false;
-                errorToast(errors.message || 'Failed to delete brand!');
+                errorToast(errors.message || 'Failed to delete user!');
             }
         });
     }
@@ -154,7 +156,7 @@ const deleteBrand = (id) => {
                                 alt="User Image" style="width: 50px; height: 50px; object-fit: cover;" class="p-1">
                         </template>
 
-                        <template #item-number="{ id,role}">
+                        <template #item-number="{ id,roleNumber}">
                             <Link type="button" class="btn btn-sm btn-outline-success"
                                 :href="route('show.save.user', { id: id })">
                             <i class="fa fa-edit"></i>
@@ -163,10 +165,10 @@ const deleteBrand = (id) => {
                                 <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Role
                             </a> -->
 
-                            <button type="button" class="btn btn-sm btn-outline-danger ml-2" @click="openRoleModal(id,role)">
+                            <button type="button" class="btn btn-sm btn-outline-danger ml-2" @click="openRoleModal(id,roleNumber)">
     <i class="fas fa-user fa-sm fa-fw mr-2 text-gray-400"></i> Role
 </button>
-                            <button class="btn btn-sm btn-outline-danger ml-2">
+                            <button class="btn btn-sm btn-outline-danger ml-2" @click.prevent="deleteUser(id)">
                                 <i class="fa fa-trash"></i>
                             </button>
                         </template>
