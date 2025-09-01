@@ -18,7 +18,7 @@ class ProductController extends Controller
     {
         $user_id = $request->header('id');
         $products = Product::with(['brand:id,name', 'category:id,name'])
-            ->where('user_id', $user_id)
+            // ->where('user_id', $user_id)
             ->orderByDesc('id')
             ->get();
         return Inertia::render('Dashboard/Product/ProductPage', ['products' => $products]);

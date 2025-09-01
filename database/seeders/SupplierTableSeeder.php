@@ -29,7 +29,7 @@ class SupplierTableSeeder extends Seeder
                 'email'    => ($index % 2 == 0) ? strtolower(str_replace(' ', '', $name)) . '@example.com' : null,
                 'phone'    => '01810000' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
                 'address'  => 'Address of ' . $name,
-                'brand_id' => rand(1, 15),
+                'brand_id' => rand(21, 37),
                 'user_id'  => 1,
             ]);
         }

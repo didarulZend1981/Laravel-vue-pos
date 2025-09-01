@@ -106,10 +106,27 @@ class AuthController extends Controller
     public function deleteUser(Request $request, $id){
 
         // dd($user_id);
-        $user = User::where('id', $id)->delete();
+        // $user = User::where('id', $id)->first();
+         $user = User::findOrFail($id);
 
 
-        if (!$user) {
+
+         if (!empty($user->image)) {
+                    // event_image এর path থেকে basename (ফাইল নাম) বের করা
+                    $fileName = basename($user->image); // উদাহরণ: event_image_17234543.jpg
+
+                    // Step 3: স্টোরেজ path ঠিক করা
+                    $filePath = 'user/' . $fileName;
+
+                    // Step 4: ফাইলটি থাকলে মুছে ফেলা
+                    if (Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
+                    }
+                }
+
+
+        $buser =   $user->delete();
+        if (!$buser) {
             $data = ['message' => 'User not found', 'status' => false, 'code' => 404];
              return redirect()->route('user.page')->with($data);
         }

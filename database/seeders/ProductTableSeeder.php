@@ -20,8 +20,8 @@ class ProductTableSeeder extends Seeder
         foreach ($productNames as $index => $name) {
             Product::create([
                 'name' => $name,
-                'brand_id' => rand(1, 17),
-                'category_id' => rand(1, 15),
+                'brand_id' => rand(21, 37),
+                'category_id' => rand(20, 34),
                 'user_id' => 1,
                 'description' => $this->generateDescription($name),
                 'price' => rand(100, 1000),

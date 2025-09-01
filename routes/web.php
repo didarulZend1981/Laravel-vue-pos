@@ -162,21 +162,14 @@ Route::group(['prefix' => '/stock', 'middleware' => tokenVerificationMiddleware:
 //======================User Management=====================//
 Route::group(['prefix' => 'user', 'middleware' => tokenVerificationMiddleware::class], function () {
 
-     Route::get('/', [AuthController::class, 'showUser'])->name('user.page');
-     Route::get('/save', [AuthController::class, 'showSaveUser'])->name('show.save.user');
+        Route::get('/', [AuthController::class, 'showUser'])->name('user.page');
+        Route::get('/save', [AuthController::class, 'showSaveUser'])->name('show.save.user');
+        Route::post('/store', [AuthController::class, 'signUp'])->name('store.user');
+        Route::post('/update', [ProfileController::class, 'updateProfile'])->name('update.user');
+        Route::put('/user/{id}/update-role', [AuthController::class, 'updateRole'])->name('update.role');
+        Route::delete('/delete/{id}', [AuthController::class, 'deleteUser'])->name('delete.user');
 
 
-     Route::post('/store', [AuthController::class, 'signUp'])->name('store.user');
-    //  Route::post('/update', [BrandController::class, 'updateBrand'])->name('update.user');
-      Route::post('/update', [ProfileController::class, 'updateProfile'])->name('update.user');
-     Route::put('/user/{id}/update-role', [AuthController::class, 'updateRole'])->name('update.role');
-    Route::delete('/delete/{id}', [AuthController::class, 'deleteUser'])->name('delete.user');
-
-    // Route::get('/', [BrandController::class, 'showBrand'])->name('brand.page');
-    // Route::get('/save', [BrandController::class, 'showSaveBrand'])->name('show.save.brand');
-    // Route::post('/store', [BrandController::class, 'storeBrand'])->name('store.brand');
-    // Route::post('/update/{id}', [BrandController::class, 'updateBrand'])->name('update.brand');
-    // Route::delete('/delete/{id}', [BrandController::class, 'deleteBrand'])->name('delete.brand');
 });
 
 //========================404 Page Management=====================//
@@ -188,3 +181,4 @@ Route::fallback(function () {
 Route::get('/comeing-soon', function () {
     return Inertia::render('ComeingSoon');
 })->name('comeing.soon');
+
