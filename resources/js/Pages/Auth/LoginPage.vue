@@ -8,8 +8,8 @@ const showPassword = ref(false);
 const loading = ref(false);
 
 const form = useForm({
-    email: 'ariful@example.com',
-    password: 'password123',
+    email: '',
+    password: '',
 });
 
 function signIn() {
