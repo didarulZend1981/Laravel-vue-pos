@@ -197,9 +197,7 @@ const deleteInvoice = (id) => {
                                     <p class="mb-2" style="line-height: 1.5;"><strong
                                             style="color: #5800cf;">Date:</strong>
                                     </p>
-                                    <p class="mb-0 text-dark" style="font-weight: 500; line-height: 1.5;">{{
-                                        currentDate
-                                    }}</p>
+                                    <p class="mb-0 text-dark" style="font-weight: 500; line-height: 1.5;">{{ new Date(invoiceDetails?.invoice_details?.created_at).toLocaleDateString() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -245,7 +243,7 @@ const deleteInvoice = (id) => {
                             <p class="summary-item" style="line-height: 2;"><strong style="color: #5800cf;">Total:
                                     $</strong> <span class="text-dark" style="font-weight: 500;" id="getTotal"> {{
                                         invoiceDetails.invoice_details.total }} </span></p>
-                           
+
                             <p class="summary-item" style="line-height: 2;"><strong
                                     style="color: #5800cf;">Paid:</strong>
                                 <span class="text-dark" style="font-weight: 500;"> {{

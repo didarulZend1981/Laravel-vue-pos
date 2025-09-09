@@ -1,89 +1,55 @@
 <script setup>
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
-import { ref, computed } from "vue";
+import { ref, computed ,onMounted } from "vue";
 import { Head, usePage, Link } from "@inertiajs/vue3";
 import axios from "axios";
 import Loader from "@/Components/Loader/Loader.vue";
+import SupplierTableComponent from "@/Components/Supplier/SupplierTableComponent.vue";
+import ProductTableComponent from "@/Components/Product/ProductTableComponent.vue";
 
 // Access props passed from the backend
 const loading = ref(false);
 const { props } = usePage();
 const suppliers = props.suppliers || []; // Ensure it's an array
 const products = props.products || [];   // Ensure it's an array
-const currentDate = new Date().toISOString().split("T")[0];
+// const currentDate = new Date().toISOString().split("T")[0];
 
-// DataTable Headers
-const supplierHeader = [
-    { text: "Type", value: "type" },
-    { text: "Name", value: "name" },
-    { text: "Action", value: "number" },
-];
 
-// Map backend data to the format required by EasyDataTable
-const supplierItems = computed(() => {
-    return suppliers.map((supplier) => ({
-        type: `<i class="fa fa-user"></i>`,
-        name: supplier.name,
-        id: supplier.id,
-        address: supplier.address,
-        phone: supplier.phone
-    }));
-});
 
-const productHeader = [
-    { text: "Image", value: "Image" },
-    { text: "Name", value: "name" },
-    { text: "Price", value: "price" },
-    { text: "Qty", value: "qty" },
-    { text: "Action", value: "number" },
-];
 
-const productItems = computed(() => {
-    return products.map((product) => ({
-        image: product.image,
-        name: product.name,
-        price: product.price,
-        qty: product.stock,
-        id: product.id,
-    }));
-});
 
-// Search functionality
-const supplierSearchValue = ref("");
-const supplierSearchField = ref(["name", "address", "phone"]);
-const productSearchValue = ref("");
-const productSearchField = ref(["name", "price"]);
+// তারিখ সংরক্ষণ
+const selectedDate = ref('')
+
+// ✅ ফরম্যাট করা তারিখ (DD-MM-YYYY)
+const formattedDate = computed(() => {
+  if (!selectedDate.value) return ''
+  const d = new Date(selectedDate.value)
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}-${month}-${year}`
+})
+
+// ✅ Component লোড হলে current date বসাও
+onMounted(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  selectedDate.value = `${year}-${month}-${day}` // 📌 YYYY-MM-DD format
+})
+
+
 
 //=======================product pick and assing to billign section=================//
-const selectedProduct = ref({ name: '', price: 0, qty: 1 });
+// const selectedProduct = ref({ name: '', price: 0, qty: 1 });
 const invoiceData = ref([]);
 const totalAmount = ref(0);
 const paidAmount = ref(0);
 
-// Function to select a product
-function pickProduct(productId) {
-    const product = products.find(prod => prod.id === productId);
-    if (product) {
-        selectedProduct.value = { ...product, qty: 1 }; // Set product with default quantity
-        $('#productCustomization').modal('show'); // Show modal
-    }
-}
 
-// Add product to invoice list
-function addProductToInvlist() {
-    const newProduct = {
-        name: selectedProduct.value.name,
-        qty: selectedProduct.value.qty,
-        purchase_price: selectedProduct.value.price,
-        total: selectedProduct.value.qty * selectedProduct.value.price, // Calculate total
-        product_id: selectedProduct.value.id,
-    };
 
-    invoiceData.value.push(newProduct); // Add to invoice list
-    updateSummary(); // Recalculate summary
-    $('#productCustomization').modal('hide'); // Hide modal
-    $('#productCustomizationBtnCls').click();
-}
 
 //remove product from invoice table
 function removeProduct(index) {
@@ -122,6 +88,7 @@ function updateSummary() {
 
 //==============================finally generate invoic==============================//
 async function generateInvoice() {
+
     try {
         loading.value = true;
 
@@ -142,13 +109,14 @@ async function generateInvoice() {
         } else {
             // Prepare the data payload
             const data = {
-                total,
-                paid,
-                rest,
-                account_payable,
-                supplier_id,
-                products: invoiceData.value,
-                invoice_name
+                    total,
+                    paid,
+                    rest,
+                    account_payable,
+                    supplier_id,
+                    products: invoiceData.value,
+                    invoice_name,
+                    purchase_date: selectedDate.value
             };
 
             // Send the invoice data to the server
@@ -241,9 +209,10 @@ const pickSupplier = (id) => {
                                         supplierPick.id
                                             }}</span></p>
                                 </div>
-                                <div class="text-end">
-                                    <p><strong>Date:</strong></p>
-                                    <p class="text-info">{{ currentDate }}</p>
+                                <div class="text-end" style="max-width: 200px;">
+                                    <!-- <p><strong>Date:</strong></p> -->
+                                    <input type="date" v-model="selectedDate" class="form-control" />
+
                                 </div>
                             </div>
 
@@ -311,116 +280,26 @@ const pickSupplier = (id) => {
 
                 <!-- pick product -->
                 <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between">
-                            <div>
-                                <h6 class="m-0 font-weight-bold text-info">Pick Product</h6>
-                            </div>
-                            <div>
-                                <input placeholder="Search..." class="form-control w-auto form-control-sm" type="text"
-                                    v-model="productSearchValue">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <EasyDataTable buttons-pagination alternating :headers="productHeader" :items="productItems"
-                                border-cell theme-color="#36b9cc" :rows-per-page="10" :search-field="productSearchField"
-                                :search-value="productSearchValue">
-                                <!-- Template for Image -->
-                                <template #item-image="{ image }">
-                                    <img :src="image ? `/storage/${image}` : 'https://skala.or.id/wp-content/uploads/2024/01/dummy-post-square-1-1.jpg'"
-                                        alt="Product Image" style="width: 50px; height: 50px; object-fit: cover;"
-                                        class="p-1">
-                                </template>
 
-                                <!-- Template for Action Buttons -->
-                                <template #item-number="{ id, name }">
-                                    <button class="btn btn-sm btn-outline-success" @click="pickProduct(id)">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
-                                </template>
-                            </EasyDataTable>
-                        </div>
-                    </div>
+
+
+                    <ProductTableComponent
+                            :products="products"
+                            @add-to-invoice="invoiceData.push($event); updateSummary()"
+                            />
                 </div>
 
                 <!-- pick customer -->
                 <div class="col-lg-4">
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3 d-flex justify-content-between">
-                            <div>
-                                <h6 class="mt-1 font-weight-bold text-info">Pick Supplier</h6>
-                            </div>
-                            <div>
-                                <input placeholder="Search..." class="form-control w-auto form-control-sm" type="text"
-                                    v-model="supplierSearchValue">
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <EasyDataTable buttons-pagination alternating :headers="supplierHeader"
-                                :items="supplierItems" border-cell theme-color="#36b9cc" :rows-per-page="15"
-                                :search-field="supplierSearchField" :search-value="supplierSearchValue">
-                                <template #item-type="{ type }">
-                                    <span
-                                        class="text-info rounded-circle border border-info d-inline-flex justify-content-center align-items-center"
-                                        style="width: 30px; height: 30px; font-size: 1rem;" v-html="type">
-                                    </span>
-                                </template>
 
-                                <template #item-number="{ id }">
-                                    <button class="btn btn-sm btn-outline-success" @click="pickSupplier(id)">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
-                                </template>
-                            </EasyDataTable>
-                        </div>
-                    </div>
+                    <SupplierTableComponent :suppliers="suppliers" @pick="pickSupplier" />
                 </div>
             </div>
         </div>
     </DashboardLayout>
 
 
-    <!-- product customization modal -->
-    <div class="modal fade" id="productCustomization" tabindex="-1" aria-labelledby="productCustomizationModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content bg-light">
-                <div class="modal-header">
-                    <h5 class="modal-title">Product for invoice</h5>
-                    <button type="button" id="productCustomizationModalLabel" class="btn btn-outline-info"
-                        data-dismiss="modal" aria-label="Close"> ×</button>
-                </div>
-                <div class="modal-body">
-                    <form id="invoiceForm" @submit.prevent="addProductToInvlist()">
-                        <div class=" mb-3">
-                            <input type="text" class="form-control" v-model="selectedProduct.name"
-                                placeholder="Product Name" readonly />
-                        </div>
 
-                        <div class=" mb-3">
-                            <input type="number" class="form-control" v-model="selectedProduct.price"
-                                placeholder="Product Price" />
-                        </div>
-
-                        <div class="mb-3">
-                            <input type="number" class="form-control" v-model="selectedProduct.qty"
-                                placeholder="Quantity" />
-                        </div>
-
-                        <div class="d-flex justify-content-end">
-                            <div>
-                                <button id="productCustomizationBtnCls" type="button" class="btn btn-outline-info mr-3"
-                                    data-dismiss="modal" aria-label="Close">Cancel</button>
-                            </div>
-                            <div>
-                                <button type="submit" class="btn btn-info">Add</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <Loader v-if="loading" />
 </template>

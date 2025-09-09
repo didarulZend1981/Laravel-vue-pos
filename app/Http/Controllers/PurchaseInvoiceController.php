@@ -38,7 +38,8 @@ class PurchaseInvoiceController extends Controller
 
     //=======================create purchase invoice=========================//
     public function createPurchaseInvoice(Request $request){
-        DB::beginTransaction();
+         DB::beginTransaction();
+        // dd($request->all());
 
         try {
             $user_id = $request->header('id');
@@ -48,6 +49,21 @@ class PurchaseInvoiceController extends Controller
             $supplier_id = $request->input('supplier_id');
             $invoice_name = $request->input('invoice_name');
             $products = $request->input('products');
+            $created_at = $request->input('purchase_date');
+
+            if ($invoice_name == null) {
+                $datePart = date('Ymd'); // ২০২৫০৯০৮
+                $randomPart = mt_rand(1000, 9999); // ৪ সংখ্যার র‍্যান্ডম নাম্বার
+                $invoice_name = 'PUR-' . $datePart . '-' . $randomPart;
+
+                // ইউনিকনেস নিশ্চিত করতে চাইলে:
+                while (PurchaseInvoice::where('invoice_name', $invoice_name)->exists()) {
+                    $randomPart = mt_rand(1000, 9999);
+                    $invoice_name = 'PUR-' . $datePart . '-' . $randomPart;
+                }
+            }
+
+            // $invoice_name = !empty($request->input('invoice_name'))? $request->input('invoice_name'): 'Default Name';
 
             // Validation for required fields
             if (!$supplier_id || empty($products)) {
@@ -70,6 +86,9 @@ class PurchaseInvoiceController extends Controller
                 'rest' => $request->input('rest'),
                 'account_payable' => $account_payable,
                 'supplier_id' => $supplier_id,
+                'created_at' => $created_at,
+
+
             ]);
 
             // Attach products to the invoice and update stock
@@ -83,6 +102,7 @@ class PurchaseInvoiceController extends Controller
                     'product_id' => $product['product_id'],
                     'qty' => $product['qty'],
                     'purchase_price' => $product['purchase_price'],
+                    'created_at' => $created_at,
                 ]);
 
                 // Deduct stock
@@ -114,6 +134,8 @@ class PurchaseInvoiceController extends Controller
                 500,
             );
         }
+
+
     }
 
     //======================show custom invoice create page===================//
