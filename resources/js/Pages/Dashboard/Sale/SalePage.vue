@@ -4,21 +4,19 @@ import { ref, computed } from "vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import Loader from "@/Components/Loader/Loader.vue";
+import SupplierTableComponent from "@/Components/Supplier/SupplierTableComponent.vue";
+
 
 
 // Access props passed from the backend
 const loading = ref(false);
 const { props } = usePage();
 const customers = props.customers || [];
-const products = props.products || [];
+// const products = props.products || [];
+const products = props.purches || [];
 const currentDate = new Date().toISOString().split("T")[0];
 
-// DataTable Headers
-const customerHeader = [
-    { text: "Type", value: "type" },
-    { text: "Name", value: "name" },
-    { text: "Action", value: "action" },
-];
+
 
 const productHeader = [
     { text: "Image", value: "image", width: 50 },
@@ -28,25 +26,18 @@ const productHeader = [
     { text: "Action", value: "action", width: 50 },
 ];
 
-// Map backend data to the format required by EasyDataTable
-const customerItems = computed(() => {
-    return customers.map((customer) => ({
-        type: `<i class="fa fa-user"></i>`,
-        name: customer.name,
-        phone: customer.phone,
-        address: customer.address,
-        id: customer.id,
-    }));
-});
+
 
 const productItems = computed(() => {
-    return products.map((product) => ({
-        image: product.image,
-        name: product.name,
-        stock: product.stock,
-        price: product.price,
-        id: product.id,
+    return products.map((item) => ({
+        image: item.products?.image || '',
+        name: item.products?.name || 'No name',
+        stock: item.stock_qty,
+        price: item.purchase_price,
+        id: item.id,
+        product_id: item.product_id,
     }));
+
 });
 
 // Search functionality
@@ -56,7 +47,7 @@ const productSearchValue = ref("");
 const productSearchField = ref(["name"]);
 
 //=======================product pick and assing to billign section=================//
-const selectedProduct = ref({ name: '', price: 0, qty: 1, sale_price: 0, amount: 0 });
+const selectedProduct = ref({ name: '', purchase_price: 0, qty: 1, sale_price: 0, amount: 0 });
 const invoiceData = ref([]);
 const totalAmount = ref(0);
 const restAmount = ref(0);
@@ -76,12 +67,13 @@ function pickProduct(productId) {
 // Add product to invoice list
 function addProductToInvlist() {
     const newProduct = {
-        name: selectedProduct.value.name,
+        name: selectedProduct.value.products?.name || 'No name',
         qty: selectedProduct.value.qty,
-        rate: selectedProduct.value.price,
+        rate: selectedProduct.value.purchase_price,
         sale_price: selectedProduct.value.sale_price,
         total: selectedProduct.value.qty * selectedProduct.value.sale_price,
-        product_id: selectedProduct.value.id,
+        product_id: selectedProduct.value.product_id,
+        id: selectedProduct.value.id,
     };
 
     invoiceData.value.push(newProduct);
@@ -195,7 +187,7 @@ async function generateInvoice() {
             errorToast("Please add products first");
         } else {
             const data = { total, vat, discount, subtotal, paid, rest, customer_payable, invoice_name, customer_id, products: invoiceData.value };
-
+            console.log("test-----",data);
             const response = await axios.post('/sale-invoice/create', data);
 
             if (response.data.status === true) {
@@ -378,14 +370,14 @@ async function generateInvoice() {
                                     <EasyDataTable buttons-pagination alternating :headers="productHeader"
                                         :items="productItems" border-cell theme-color="#36b9cc" :rows-per-page="10"
                                         :search-field="productSearchField" :search-value="productSearchValue">
-                                        <!-- Template for Image -->
+
                                         <template #item-image="{ image }">
                                             <img :src="image ? `/storage/${image}` : '/asset/img/placeholder.jpg'"
                                                 alt="Product Image"
                                                 style="width: 50px; height: 50px; object-fit: cover;" class="p-1">
                                         </template>
 
-                                        <!-- Template for Action Buttons -->
+
                                         <template #item-action="{ id }">
                                             <button class="btn btn-sm btn-outline-success" @click="pickProduct(id)">
                                                 <i class="fa fa-plus"></i>
@@ -394,41 +386,18 @@ async function generateInvoice() {
                                     </EasyDataTable>
                                 </div>
                             </div>
+
+
+
+
                         </div>
 
                         <!-- pick customer -->
                         <div class="col-lg-4">
-                            <div class="card shadow mb-4">
-                                <div class="card-header py-3 d-flex justify-content-between">
-                                    <div>
-                                        <h6 class="mt-1 font-weight-bold text-info">Pick Customer</h6>
-                                    </div>
-                                    <div>
-                                        <input placeholder="Search..." class="form-control w-auto form-control-sm"
-                                            type="text" v-model="customerSearchValue">
-                                    </div>
 
-                                </div>
-                                <div class="card-body">
-                                    <EasyDataTable buttons-pagination alternating :headers="customerHeader"
-                                        :items="customerItems" border-cell theme-color="#36b9cc" :rows-per-page="10"
-                                        :search-field="customerSearchField" :search-value="customerSearchValue">
-                                        <template #item-type="{ type }">
-                                            <span
-                                                class="text-info rounded-circle border border-info d-inline-flex justify-content-center align-items-center"
-                                                style="width: 35px; height: 35px; font-size: 1rem; margin: 5px 0;"
-                                                v-html="type">
-                                            </span>
-                                        </template>
 
-                                        <template #item-action="{ id }">
-                                            <button class="btn btn-sm btn-outline-success" @click="pickCustomer(id)">
-                                                <i class="fa fa-plus"></i>
-                                            </button>
-                                        </template>
-                                    </EasyDataTable>
-                                </div>
-                            </div>
+
+                            <SupplierTableComponent :suppliers="customers" supplier-label="Pic Customer" @pick="pickCustomer" />
                         </div>
                     </div>
                 </div>
@@ -450,13 +419,13 @@ async function generateInvoice() {
                     <form id="invoiceForm" @submit.prevent="addProductToInvlist()">
                         <div class=" mb-3">
                             <label class="form-label">Product name</label>
-                            <input type="text" class="form-control" v-model="selectedProduct.name"
-                                placeholder="Product Name" readonly />
+                            <input type="text" class="form-control" :value="selectedProduct.products?.name || ''"
+                            placeholder="Product Name" readonly />
                         </div>
 
                         <div class=" mb-3">
                             <label class="form-label">Product origingal price</label>
-                            <input type="number" class="form-control" v-model="selectedProduct.price"
+                            <input type="number" class="form-control" v-model="selectedProduct.purchase_price"
                                 placeholder="Product origingal price" readonly />
                         </div>
 
@@ -516,3 +485,7 @@ async function generateInvoice() {
     white-space: normal;
 }
 </style>
+
+
+
+

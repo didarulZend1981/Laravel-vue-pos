@@ -46,12 +46,22 @@
     <div class="modal-body">
       <form @submit.prevent="addProductToInvoice">
         <div class="mb-3">
-          <input type="text" class="form-control" v-model="selectedProduct.name" readonly />
+          <!-- <input type="text" class="form-control" v-model="selectedProduct.name" readonly /> -->
+
+            <label class="form-label">Product name</label>
+            <input type="text" class="form-control" v-model="selectedProduct.name" placeholder="Product Name" readonly />
         </div>
         <div class="mb-3">
+            <label class="form-label">Product origingal price</label>
           <input type="number" class="form-control" v-model="selectedProduct.price" placeholder="Product Price" />
         </div>
+        <!-- <div class=" mb-3">
+                            <label class="form-label">Product sale price for customer</label>
+                            <input type="number" class="form-control" v-model="selectedProduct.sale_price"
+                                placeholder="Sale price" />
+                        </div> -->
         <div class="mb-3">
+            <label class="form-label">Product quantity</label>
           <input type="number" class="form-control" v-model="selectedProduct.qty" placeholder="Quantity" />
         </div>
         <div class="d-flex justify-content-end">

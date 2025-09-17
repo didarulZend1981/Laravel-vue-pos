@@ -5,6 +5,10 @@ const props = defineProps({
     suppliers: {
         type: Array,
         default: () => []
+    },
+    supplierLabel: {
+        type: String,
+        default: "Pick Supplier"
     }
 });
 
@@ -40,7 +44,7 @@ function pickSupplier(id) {
     <div class="card shadow mb-4">
         <div class="card-header py-3 d-flex justify-content-between">
             <div>
-                <h6 class="mt-1 font-weight-bold text-info">Pick Supplier</h6>
+                <h6 class="mt-1 font-weight-bold text-info">{{ supplierLabel }}</h6>
             </div>
             <div>
                 <input placeholder="Search..." class="form-control w-auto form-control-sm" type="text"

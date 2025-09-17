@@ -21,6 +21,8 @@ use App\Http\Controllers\StockController;
 //home page
 Route::get('/', function () {
     // return Inertia::render('HomePage');
+
+
 });
 
 //======================Registration Management=====================//
@@ -115,7 +117,7 @@ Route::group(['prefix' => '/sale-invoice', 'middleware' => tokenVerificationMidd
     Route::delete('/delete/{id}', [SaleInvoiceController::class, 'invoiceDelete'])->name('sale.invoice.delete');
 });
 
-//========================Invoice Management=====================//
+//========================Purchase Management=====================//
 Route::group(['prefix' => '/purchase-invoice', 'middleware' => tokenVerificationMiddleware::class], function () {
     Route::get('/list', [PurchaseInvoiceController::class, 'showPurchaseInvoiceList'])->name('show.purchase.invoice.page');
     Route::get('/', [PurchaseInvoiceController::class, 'showPurchaseInvoice'])->name('show.purchase.invoice');

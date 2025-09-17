@@ -32,7 +32,7 @@ class PurchaseInvoiceController extends Controller
 
         return Inertia::render('Dashboard/Purchase/PurchasePage', [
             'suppliers' => $suppliers,
-            'products' => $products,
+             'products' => $products,
         ]);
     }
 
@@ -101,6 +101,7 @@ class PurchaseInvoiceController extends Controller
                     'user_id' => $user_id,
                     'product_id' => $product['product_id'],
                     'qty' => $product['qty'],
+                    'stock_qty' => $product['qty'],
                     'purchase_price' => $product['purchase_price'],
                     'created_at' => $created_at,
                 ]);

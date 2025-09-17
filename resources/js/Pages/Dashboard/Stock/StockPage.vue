@@ -84,7 +84,7 @@
                         :search-field="searchField" :search-value="searchValue">
 
                         <template #item-image="{ image }">
-                            <img :src="image ? `/storage/products/${image}` : '/asset/img/placeholder.jpg'"
+                            <img :src="image ? `/storage/${image}` : '/asset/img/placeholder.jpg'"
                                 alt="product Image" style="width: 50px; height: 50px; object-fit: cover;" class="p-1">
                         </template>
 
@@ -121,9 +121,13 @@ const Header = [
     { text: "image", value: "image" },
     { text: "product_name", value: "product_name" },
     { text: "opening", value: "opening" },
-    { text: "purchase", value: "purchase" },
+    { text: "opening_blance", value: "opening_blance" },
+    { text: "purchase_blance", value: "purchase" },
+    { text: "purchase_blance", value: "purchase_blance" },
     { text: "sale", value: "sale" },
+    { text: "sale_blance", value: "sale_blance" },
     { text: "closing", value: "closing" },
+    { text: "closing_blance", value: "closing_blance" },
 ];
 
 // Search functionality
@@ -133,11 +137,16 @@ const searchField = ref(["product_name"]);
 const Item = computed(() => {
     return page.props.report?.map((item, index) => ({
         no: index + 1,
+        image: item.image,
         product_name: item.product_name,
-        opening: item.opening,
-        purchase: item.purchase,
-        sale: item.sale,
-        closing: item.closing,
+        opening: item.opening_qty,
+        opening_blance: item.opening_balance,
+        purchase: item.purchase_qty,
+        purchase_blance: item.purchase_balance,
+        sale: item.sale_qty,
+        sale_blance: item.sale_balance,
+        closing: item.closing_qty,
+        closing_blance: item.closing_balance,
     })) || [];
 });
 

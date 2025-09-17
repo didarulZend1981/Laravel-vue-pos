@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\SaleInvoiceProducts;
 use Illuminate\Validation\ValidationException;
 use App\Http\Requests\ValidateCustomInvoiceRequest;
+use App\Models\PurchaseInvoiceProducts;
 
 class SaleInvoiceController extends Controller
 {
@@ -20,16 +21,35 @@ class SaleInvoiceController extends Controller
         $user_id = $request->header('id');
         $customers = Customer::where('user_id', $user_id)->orderBy('id', 'desc')->get();
         $products = Product::where('user_id', $user_id)->where('stock', '>', 0)->orderByDesc('id')->get();
+        $purches = PurchaseInvoiceProducts::with('products:id,name,image')->where('user_id', $user_id)->get();
+
+
+        // dd($purches);
+        // return response()->json([
+        //     'status'=> true,
+        //     'message'=> 'Events data',
+        //     'data'=> $products,
+        // ], 200);
+
+
+        // return Inertia::render('Dashboard/Sale/SalePage', [
+        //     'customers' => $customers, // Use a key-value pair
+        //     'products' => $products, // Use a key-value pair
+        // ]);
 
         return Inertia::render('Dashboard/Sale/SalePage', [
             'customers' => $customers, // Use a key-value pair
-            'products' => $products, // Use a key-value pair
+            'purches' => $purches, // Use a key-value pair
         ]);
     }
 
     //==========================create invoice=========================//
     public function createSaleInvoice(Request $request)
     {
+
+
+
+        // dd($request->all());
         DB::beginTransaction();
 
         try {
@@ -87,6 +107,7 @@ class SaleInvoiceController extends Controller
             foreach ($products as $product) {
                 // Check if product exists
                 $productRecord = Product::find($product['product_id']);
+                $PurchaseInvoiceProductsRecord = PurchaseInvoiceProducts::find($product['id']);
                 if (!$productRecord) {
                     DB::rollBack();
                     return response()->json(
@@ -126,6 +147,9 @@ class SaleInvoiceController extends Controller
                 // Deduct stock
                 $productRecord->stock -= $product['qty'];
                 $productRecord->save();
+
+                $PurchaseInvoiceProductsRecord->stock_qty -= $product['qty'];
+                $PurchaseInvoiceProductsRecord->save();
             }
 
             DB::commit();
@@ -257,7 +281,7 @@ class SaleInvoiceController extends Controller
         $user_id = $request->header('id');
         $customer_id = $request->input('customer_id');
 
-        $customer_details = Customer::where('user_id', $user_id)->where('id', $customer_id)->first();     
+        $customer_details = Customer::where('user_id', $user_id)->where('id', $customer_id)->first();
         $invoice_details = SaleInvoice::where('user_id', $user_id)->where('id', $id)->first();
         $invoice_products = SaleInvoiceProducts::where('sale_invoice_id', $id)->where('user_id', $user_id)->with('products')->get();
 
