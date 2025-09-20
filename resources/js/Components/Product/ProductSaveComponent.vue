@@ -14,10 +14,10 @@ const product = page.props.product || {};
 // Form data
 const form = useForm({
     name: product.name || '',
-    price: product.price || '',
+
     unit: product.unit || '',
     discount_price: product.discount_price || '',
-    stock: product.stock || '',
+
     status: product.status || '',
     brand_id: product.brand_id || '',
     category_id: product.category_id || '',
@@ -39,14 +39,10 @@ function saveProduct() {
             loading.value = false;
             if (errors.name) {
                 errorToast(errors.name);
-            } else if (errors.price) {
-                errorToast(errors.price);
             } else if (errors.unit) {
                 errorToast(errors.unit);
             } else if (errors.discount_price) {
                 errorToast(errors.discount_price);
-            } else if (errors.stock) {
-                errorToast(errors.stock);
             } else if (errors.status) {
                 errorToast(errors.status);
             } else if (errors.brand_id) {
@@ -127,12 +123,12 @@ function handleImageInput(event) {
                                         placeholder="Product Name" />
                                 </div>
                                 <!-- product price -->
-                                <div class="col-md-2"> <label for="productPrice">Price <span
+                                <!-- <div class="col-md-2"> <label for="productPrice">Price <span
                                             class="text-danger">*</span></label>
                                     <input type="number" v-model="form.price" class="form-control" id="productPrice"
                                         placeholder="Price" />
-                                </div>
-                            
+                                </div> -->
+
                                 <!-- unit -->
                                 <div class="col-md-2"> <label for="productUnit">Unit (e.g., KG, Pcs) <span
                                             class="text-danger">*</span></label>
@@ -141,11 +137,11 @@ function handleImageInput(event) {
                                 </div>
 
                                 <!-- stock quantity -->
-                                <div class="col-md-2"> <label for="productStock">Stock qty<span
+                                <!-- <div class="col-md-2"> <label for="productStock">Stock qty<span
                                             class="text-danger"> *</span></label>
                                     <input type="number" v-model="form.stock" class="form-control" id="productStock"
                                         placeholder="Stock" />
-                                </div>
+                                </div> -->
                             </div>
 
                             <div class=" mb-3">

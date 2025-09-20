@@ -40,7 +40,7 @@
 
 <body>
 
-    <h3 class="text-center">ABC shop's purchase report</h3>
+    <h3 class="text-center">ABC shop's purchase</h3>
 
     <table class="customers">
         <thead>
@@ -93,6 +93,8 @@
             @endforeach
         </tbody>
     </table>
+
+<h2>ddd</h2>
 </body>
 
 </html>

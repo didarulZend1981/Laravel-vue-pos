@@ -2,21 +2,35 @@
 <html>
 
 <head>
-    <style>
-        .text-center{
-            text-align: center;
-        }
-        .customers {
-            font-family: Arial, Helvetica, sans-serif;
-            border-collapse: collapse;
-            width: 100%;
-            font-size: 12px !important;
+     <style>
+        /* A4 page setup */
+        @page {
+            size: A4 portrait;
+            margin: 15mm 10mm 15mm 10mm;
         }
 
-        .customers td,
-        #customers th {
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 0 10%;
+            width: 80%;
+            font-size: 12px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .customers {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        .customers th,
+        .customers td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 6px;
         }
 
         .customers tr:nth-child(even) {
@@ -28,12 +42,45 @@
         }
 
         .customers th {
-            padding-top: 12px;
-            padding-bottom: 12px;
-            padding-left: 6px;
+            padding: 10px 6px;
             text-align: left;
             background-color: #009CFF;
             color: white;
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+               margin: 0 10%;
+                font-size: 11px;
+            }
+
+            .print-button {
+                display: none; /* hide print button when printing */
+            }
+
+            table.customers {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+
+        /* Print button style */
+        .print-button {
+            margin: 10px 0;
+            padding: 6px 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .print-button:hover {
+            background-color: #218838;
         }
     </style>
 </head>
@@ -92,11 +139,33 @@
                     <td>{{ $item->discount }}</td>
                     <td>{{ $item->vat }}</td>
                     <td>{{ $item->payable }}</td>
-                    <td>{{ $item->created_at }}</td>
+                    <td>{{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y h:i A') }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
+        <button class="print-button" onclick="window.print()">Print Report</button>
+        <script>
+            function formatDate(dateString) {
+
+
+
+                const date = new Date(dateString);
+
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+
+                let hours = date.getHours();
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+
+                hours = hours % 12;
+                hours = hours ? hours : 12; // 0 হলে 12 দেখাবে
+
+                return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+                }
+        </script>
 </body>
 
 </html>

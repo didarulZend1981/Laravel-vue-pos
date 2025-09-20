@@ -288,8 +288,7 @@ class PurchaseInvoiceController extends Controller
     }
 
     //======================purchase invoice details========================//
-    public function purchaseInvoiceDelete(Request $request, $id)
-    {
+    public function purchaseInvoiceDelete(Request $request, $id){
         $user_id = $request->header('id');
 
         DB::beginTransaction();
@@ -332,4 +331,9 @@ class PurchaseInvoiceController extends Controller
             return redirect()->back()->with($data);
         }
     }
+
+
+
+
+
 }

@@ -65,6 +65,36 @@ async function detailsModalShow(id, cus_id) {
     }
 }
 
+function formatDate(dateString) {
+//   const date = new Date(dateString);
+//   const day = String(date.getDate()).padStart(2, '0');
+//   const month = String(date.getMonth() + 1).padStart(2, '0');
+//   const year = date.getFullYear();
+//   return `${day}/${month}/${year}`;
+
+
+
+
+ const date = new Date(dateString);
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+
+  let hours = date.getHours();
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+
+  hours = hours % 12;
+  hours = hours ? hours : 12; // 0 হলে 12 দেখাবে
+
+  return `${day}/${month}/${year} ${hours}:${minutes} ${ampm}`;
+}
+
+
+
+
+
 
 //==================print invoice==========================//
 function printInvoice() {
@@ -151,8 +181,8 @@ const deleteInvoice = (id) => {
                             <h3 class="modal-title mb-1" style="color: white; font-weight: 700;">ABC Shop</h3>
                             <p class="mb-0" style="color: #e8f5e9;">123, XYX Street, Mars Planet</p>
                             <p class="mb-0" style="color: #e8f5e9;">Phone: +1-234-567-890 | Email: info@abc.com</p>
-                            <p class="mb-0" style="color: #e8f5e9;">Website: <a href="https://codearif.com"
-                                    target="_blank" style="color: #e8f5e9; text-decoration: underline;">codearif.com</a>
+                            <p class="mb-0" style="color: #e8f5e9;">Website: <a href="https://appwebd.com/"
+                                    target="_blank" style="color: #e8f5e9; text-decoration: underline;">appwebd.com</a>
                             </p>
                         </div>
 
@@ -202,13 +232,19 @@ const deleteInvoice = (id) => {
                                                 invoiceDetails?.customer_details?.address }}</span> </p>
                                 </div>
                                 <div class="text-end flex-shrink-0">
-                                    <p class="mb-2" style="line-height: 1.5;"><strong
-                                            style="color: #2e7d32;">Date:</strong>
+                                    <p class="mb-2" style="line-height: 1.5;">
+                                        <strong style="color: #2e7d32;">Date:</strong>
+                                            <strong>{{ formatDate(invoiceDetails.invoice_details.created_at) }}</strong>
                                     </p>
-                                    <p class="mb-0 text-success" style="font-weight: 500; line-height: 1.5;">{{
-                                        currentDate
-                                    }}</p>
+
+
+                                    <p class="mb-2" style="line-height: 1.5;">
+                                        <strong style="color: #2e7d32;">Invoice:</strong>
+                                        <strong>{{invoiceDetails.invoice_details.invoice_name}}</strong>
+                                    </p>
+
                                 </div>
+
                             </div>
                         </div>
 

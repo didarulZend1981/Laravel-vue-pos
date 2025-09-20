@@ -11,9 +11,9 @@ const Header = [
     { text: "Name", value: "name" },
     { text: "Brand", value: "brand" },
     { text: "Category", value: "category" },
-    { text: "Price", value: "price" },
+    // { text: "Price", value: "price" },
     { text: "Unit", value: "unit" },
-    { text: "Stock", value: "stock" },
+    // { text: "Stock", value: "stock" },
     { text: "Action", value: "number" },
 ];
 
@@ -22,9 +22,9 @@ const Item = computed(() => {
         no: index + 1,
         image: product.image,
         name: product?.name,
-        price: product.price,
+        // price: product.price,
         unit: product.unit,
-        stock: product.stock,
+        // stock: product.stock,
         category: product.category?.name,
         brand: product.brand?.name || "N/A",
         id: product.id,

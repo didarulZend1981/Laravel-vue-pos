@@ -83,7 +83,7 @@ function signIn() {
                     <button type="submit" class="btn btn-info w-100">Sign In</button>
                 </form>
 
-                <div class="text-center mt-3">
+                <!-- <div class="text-center mt-3">
                     <Link class="small" :href="route('OTP.page')">Forgot Password?</Link>
                 </div>
                 <div class="text-center">
@@ -92,7 +92,7 @@ function signIn() {
                 <hr>
                 <div class="text-center">
                     <Link class="btn btn-sm btn-outline-danger" :href="route('comeing.soon')">Login with Google</Link>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

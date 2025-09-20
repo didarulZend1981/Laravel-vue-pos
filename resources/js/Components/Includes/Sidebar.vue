@@ -223,19 +223,24 @@ onUnmounted(() => {
 
         <!-- sale and custom sale generate -->
 
-        <SidebarDropdown
+        <!-- <SidebarDropdown
             v-if="profileData.role == 1 || profileData.role == 2"
             title="Sale Generate"
             icon="fa fa-dollar-sign icon"
             collapseId="collapseSix"
-            :activeUrls="['/sale-invoice', '/sale-invoice/custom']"
+            :activeUrls="['/sale-invoice']"
             :links="[
             { label: 'Create Sale', href: '/sale-invoice' },
-            { label: 'Custom Sale', href: '/sale-invoice/custom' }
+            // { label: 'Custom Sale', href: '/sale-invoice/custom' }
 
             ]"
+        /> -->
+        <SidebarItem
+            v-if="profileData.role == 1 || profileData.role == 2"
+            label="Create Sale"
+            icon="fa fa-dollar-sign icon"
+            href="/sale-invoice"
         />
-
 
 
 
@@ -243,17 +248,24 @@ onUnmounted(() => {
         <!-- Purchase and custom purchase generate -->
 
 
-         <SidebarDropdown
+         <!-- <SidebarDropdown
             v-if="profileData.role == 1"
             title="Purchase"
             icon="fa fa-shopping-cart icon"
             collapseId="collapseSeven"
-            :activeUrls="['/purchase-invoice', '/purchase-invoice/custom']"
+            :activeUrls="['/purchase-invoice']"
             :links="[
             { label: 'Create purchase', href: '/purchase-invoice' },
-            { label: 'Custom purchase', href: '/sale-invoice/custom' }
+            // { label: 'Custom purchase', href: '/sale-invoice/custom' }
 
             ]"
+        /> -->
+
+        <SidebarItem
+            v-if="profileData.role == 1"
+            label="Purchase"
+            icon="fa fa-shopping-cart icon"
+            href="/purchase-invoice"
         />
 
         <SidebarItem

@@ -64,6 +64,19 @@ class SaleInvoiceController extends Controller
             $customer_id = $request->input('customer_id');
             $products = $request->input('products');
             $user_id = $request->header('id');
+            $created_at = $request->input('invoice_date');
+
+            if ($invoice_name == null) {
+                $datePart = date('Ymd'); // ২০২৫০৯০৮
+                $randomPart = mt_rand(1000, 9999); // ৪ সংখ্যার র‍্যান্ডম নাম্বার
+                $invoice_name = 'inv-' . $datePart . '-' . $randomPart;
+
+                // ইউনিকনেস নিশ্চিত করতে চাইলে:
+                while (SaleInvoice::where('invoice_name', $invoice_name)->exists()) {
+                    $randomPart = mt_rand(1000, 9999);
+                    $invoice_name = 'inv-' . $datePart . '-' . $randomPart;
+                }
+            }
 
             // Validation for required fields
             if (!$customer_id) {
@@ -101,6 +114,7 @@ class SaleInvoiceController extends Controller
                 'customer_payable' => $customer_payable,
                 'user_id' => $user_id,
                 'customer_id' => $customer_id,
+                'created_at' => $created_at,
             ]);
 
             // Attach products to the invoice and update stock
@@ -142,6 +156,7 @@ class SaleInvoiceController extends Controller
                     'rate' => $product['rate'],
                     'sale_price' => $product['sale_price'],
                     'amount' => $product['total'],
+                    'created_at' => $created_at,
                 ]);
 
                 // Deduct stock

@@ -54,18 +54,17 @@ class ProductController extends Controller
     }
 
     //===========================product create =============================//
-    public function storeProduct(Request $request)
-    {
-        // dd($request->all());
+    public function storeProduct(Request $request){
+         // dd($request->all());
         $user_id = $request->header('id');
 
         $request->validate([
             'name' => 'required|max:255',
-            'price' => 'required|numeric|min:0',
+            // 'price' => 'required|numeric|min:0',
             'unit' => 'required|max:10',
             'category_id' => 'required|integer|exists:categories,id',
             'brand_id' => 'nullable|integer|exists:brands,id',
-            'stock' => 'required|integer|min:0',
+
             'image' => 'nullable|max:2048',
             'description' => 'nullable|string',
         ]);
@@ -84,9 +83,9 @@ class ProductController extends Controller
                 'category_id' => $request->input('category_id'),
                 'brand_id' => $request->input('brand_id'),
                 'name' => $request->input('name'),
-                'price' => $request->input('price'),
+                'price' => 0,
                 'unit' => $request->input('unit'),
-                'stock' => $request->input('stock'),
+                'stock' => 0,
                 'description' => $request->input('description'),
                 'image' => $image_url,
             ]);

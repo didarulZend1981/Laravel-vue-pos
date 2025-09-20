@@ -84,7 +84,19 @@ class StockController extends Controller
                 'closing_qty' => $closingQty,
                 'closing_balance' => $closingBalance,
             ];
-        });
+        })  ->sortBy(function ($item) {
+        $allZero = (
+            $item['opening_qty'] == 0 &&
+            $item['opening_balance'] == 0 &&
+            $item['purchase_qty'] == 0 &&
+            $item['purchase_balance'] == 0 &&
+            $item['sale_qty'] == 0 &&
+            $item['sale_balance'] == 0 &&
+            $item['closing_qty'] == 0 &&
+            $item['closing_balance'] == 0
+        );
+        return $allZero ? 1 : 0; // 0 মানে আগে, 1 মানে পরে
+    })->values();
 
         return $report;
     }

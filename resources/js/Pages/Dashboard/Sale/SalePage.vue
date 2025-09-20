@@ -1,6 +1,6 @@
 <script setup>
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
-import { ref, computed } from "vue";
+import { ref, computed,onMounted } from "vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import Loader from "@/Components/Loader/Loader.vue";
@@ -16,6 +16,27 @@ const customers = props.customers || [];
 const products = props.purches || [];
 const currentDate = new Date().toISOString().split("T")[0];
 
+// তারিখ সংরক্ষণ
+const selectedDate = ref('')
+
+// ✅ ফরম্যাট করা তারিখ (DD-MM-YYYY)
+const formattedDate = computed(() => {
+  if (!selectedDate.value) return ''
+  const d = new Date(selectedDate.value)
+  const day = String(d.getDate()).padStart(2, '0')
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const year = d.getFullYear()
+  return `${day}-${month}-${year}`
+})
+
+// ✅ Component লোড হলে current date বসাও
+onMounted(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  selectedDate.value = `${year}-${month}-${day}` // 📌 YYYY-MM-DD format
+})
 
 
 const productHeader = [
@@ -60,9 +81,26 @@ function pickProduct(productId) {
     const product = products.find(prod => prod.id === productId);
     if (product) {
         selectedProduct.value = { ...product, qty: 1 };
+
         $('#productCustomization').modal('show');
     }
 }
+
+    // qty validation
+    function checkQty() {
+            if (!selectedProduct.value) return;
+
+            if (selectedProduct.value.qty > selectedProduct.value.stock_qty) {
+                alert("Quantity cannot be more than available stock!");
+                selectedProduct.value.qty = selectedProduct.value.stock_qty;
+            } else if (selectedProduct.value.qty < 1) {
+                alert("Quantity cannot be less than 1!");
+                selectedProduct.value.qty = 1;
+            }
+    }
+
+     // checkSalePrice validation
+
 
 // Add product to invoice list
 function addProductToInvlist() {
@@ -186,7 +224,7 @@ async function generateInvoice() {
         } else if (invoiceData.value.length === 0) {
             errorToast("Please add products first");
         } else {
-            const data = { total, vat, discount, subtotal, paid, rest, customer_payable, invoice_name, customer_id, products: invoiceData.value };
+            const data = { total, vat, discount, subtotal, paid, rest, customer_payable, invoice_name, customer_id, products: invoiceData.value,invoice_date: selectedDate.value };
             console.log("test-----",data);
             const response = await axios.post('/sale-invoice/create', data);
 
@@ -263,10 +301,11 @@ async function generateInvoice() {
                                                 customerPick.id
                                                     }}</span></p>
                                         </div>
-                                        <div class="text-end">
-                                            <p style="line-height: 0.8;"><strong>Date:</strong></p>
-                                            <p style="line-height: 0.8;" class="text-info">{{ currentDate }}</p>
-                                        </div>
+                                        <div class="text-end" style="max-width: 200px;">
+                                    <!-- <p><strong>Date:</strong></p> -->
+                                    <input type="date" v-model="selectedDate" class="form-control" />
+
+                                </div>
                                     </div>
 
                                     <!-- Product Table -->
@@ -431,14 +470,18 @@ async function generateInvoice() {
 
                         <div class=" mb-3">
                             <label class="form-label">Product sale price for customer</label>
-                            <input type="number" class="form-control" v-model="selectedProduct.sale_price"
-                                placeholder="Sale price" />
+                            <input type="number" class="form-control" v-model.number="selectedProduct.sale_price"
+                              
+                              placeholder="Sale price" />
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Product quantity</label>
                             <input type="number" class="form-control" v-model="selectedProduct.qty"
-                                placeholder="Quantity" />
+                                @input="checkQty"
+                                min="1"
+                               placeholder="Quantity" />
+                                <p>Available Stock: {{ selectedProduct.stock_qty }}</p>
                         </div>
 
                         <div class="d-flex justify-content-end">

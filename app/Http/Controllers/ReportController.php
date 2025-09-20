@@ -51,8 +51,15 @@ class ReportController extends Controller
         ];
 
         $timestamp = now()->format('Ymd_His'); // e.g., 20241130_120000
-        $pdf = Pdf::loadView('report.saleReport', $data);
-        return $pdf->download("saleReport_{$timestamp}.pdf");
+        // $pdf = Pdf::loadView('report.saleReport', $data);
+        // return $pdf->download("saleReport_{$timestamp}.pdf");
+
+        // return Pdf::loadView('report.saleReport', $data)
+        //       ->stream("saleReport_{$timestamp}.pdf", ["Attachment" => false]);
+
+        return view('report.saleReport', $data);
+
+
     }
 
     //purchase report

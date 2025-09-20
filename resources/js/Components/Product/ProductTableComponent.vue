@@ -89,7 +89,7 @@ const emit = defineEmits(['add-to-invoice']);
 const productHeader = [
   { text: "Image", value: "image" },
   { text: "Name", value: "name" },
-  { text: "Price", value: "price" },
+//   { text: "Price", value: "price" },
   { text: "Qty", value: "qty" },
   { text: "Action", value: "number" },
 ];
@@ -103,7 +103,7 @@ const productItems = computed(() => {
   return products.map(p => ({
     image: p.image,
     name: p.name,
-    price: p.price,
+    // price: p.price,
     qty: p.stock,
     id: p.id
   }));
