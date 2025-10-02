@@ -119,6 +119,8 @@ async function generateInvoice() {
                     purchase_date: selectedDate.value
             };
 
+            
+
             // Send the invoice data to the server
             const response = await axios.post(route('create.purchase.invoice'), data);
 

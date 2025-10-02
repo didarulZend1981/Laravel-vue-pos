@@ -333,6 +333,12 @@ onUnmounted(() => {
         icon="fa fa-box icon"
         href="/stock"
         />
+        <SidebarItem
+          v-if="profileData.role == 1 || profileData.role == 2 || profileData.role == 3"
+        label="waste"
+        icon="fa fa-box icon"
+        href="/waste"
+        />
     </ul>
 </template>
 

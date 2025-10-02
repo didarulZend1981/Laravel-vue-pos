@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchaseInvoice extends Model
 {
-    protected $fillable = ['user_id', 'total', 'paid', 'rest', 'account_payable', 'supplier_id', 'invoice_name','created_at'];
+    protected $fillable = ['user_id', 'total', 'paid', 'rest', 'account_payable', 'supplier_id', 'invoice_name','case','refund','created_at'];
 
 
     public function supplier(){

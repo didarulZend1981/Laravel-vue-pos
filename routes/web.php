@@ -17,6 +17,7 @@ use App\Http\Controllers\PurchaseInvoiceController;
 use App\Http\Middleware\tokenVerificationMiddleware;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\WasteProductController;
 
 //home page
 Route::get('/', function () {
@@ -24,6 +25,9 @@ Route::get('/', function () {
 
 
 });
+Route::get('/Waste', [WasteProductController::class, 'moveExpiredToWaste'])->name('west');
+
+Route::get('/AllWaste', [WasteProductController::class, 'allWaste'])->name('allWaste');
 
 //======================Registration Management=====================//
 Route::get('/sign-up', [AuthController::class, 'showSignUp'])->name('signup.page');
@@ -135,6 +139,13 @@ Route::group(['prefix' => '/report', 'middleware' => tokenVerificationMiddleware
     Route::get('/purchase/{FormDate}/{ToDate}', [ReportController::class, 'purchaseReport'])->name('purchase.report');
 });
 
+
+//========================Waste Management=====================//
+Route::group(['prefix' => '/waste', 'middleware' => tokenVerificationMiddleware::class], function () {
+    Route::get('/', [WasteProductController::class, 'allWaste'])->name('waste.page');
+    Route::post('/refund', [WasteProductController::class, 'wasteProductRefound'])->name('waste.refund');
+
+});
 //======================Dashboard Management=====================//
 Route::group(['prefix' => 'dashboard', 'middleware' => tokenVerificationMiddleware::class], function () {
     Route::get('/', [DashboardController::class, 'showDashboard'])->name('show.dashboard');

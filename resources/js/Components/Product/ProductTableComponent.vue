@@ -37,47 +37,42 @@
     </div>
 
     <!-- Modal -->
-<div v-if="showModal" class="custom-modal-backdrop">
-  <div class="custom-modal">
-    <div class="modal-header">
-      <h5 class="modal-title">Product for Invoice</h5>
-      <button type="button" class="btn btn-outline-info" @click="closeModal">×</button>
-    </div>
-    <div class="modal-body">
-      <form @submit.prevent="addProductToInvoice">
-        <div class="mb-3">
-          <!-- <input type="text" class="form-control" v-model="selectedProduct.name" readonly /> -->
 
-            <label class="form-label">Product name</label>
-            <input type="text" class="form-control" v-model="selectedProduct.name" placeholder="Product Name" readonly />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Product origingal price</label>
-          <input type="number" class="form-control" v-model="selectedProduct.price" placeholder="Product Price" />
-        </div>
-        <!-- <div class=" mb-3">
-                            <label class="form-label">Product sale price for customer</label>
-                            <input type="number" class="form-control" v-model="selectedProduct.sale_price"
-                                placeholder="Sale price" />
-                        </div> -->
-        <div class="mb-3">
-            <label class="form-label">Product quantity</label>
-          <input type="number" class="form-control" v-model="selectedProduct.qty" placeholder="Quantity" />
-        </div>
-        <div class="d-flex justify-content-end">
-          <button type="button" class="btn btn-outline-info mr-3" @click="closeModal">Cancel</button>
-          <button type="submit" class="btn btn-info">Add</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+
+        <ProductFormModal
+            :show="showModal"
+            :product="selectedProduct"
+            :onClose="closeModal"
+            :onSubmit="addProductToInvoice"
+            title="Add Product to Purchess"
+            :fields="[
+                { label: 'Product Name', model: 'name', readonly: true },
+                { label: 'Price', model: 'price', type: 'number' },
+                { label: 'Qty', model: 'qty', type: 'number' },
+                { label: 'Manufacture Date', model: 'ManufectureDate', type: 'date' },
+                { label: 'Validate Time', model: 'ValidateTime', type: 'number' },
+                { label: 'Expiry Date', model: 'ExpaireDate', type: 'date' }
+            ]"
+        />
+
+
+
+
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue'
+import ProductFormModal from './ProductFormModal.vue';
+
+
+
+// তারিখ সংরক্ষণ
+const selectedDate = ref('')
+const selectedExp = ref('')
+
+
 
 const props = defineProps({
   products: Array
@@ -100,28 +95,84 @@ const productSearchField = ref(['name', 'price']);
 const products = props.products || [];
 
 const productItems = computed(() => {
-  return products.map(p => ({
-    image: p.image,
-    name: p.name,
-    // price: p.price,
-    qty: p.stock,
-    id: p.id
-  }));
+  return products
+    .slice()
+    .sort((a, b) => {
+
+      const aStock = a.stock ?? 0;
+      const bStock = b.stock ?? 0;
+
+      if (aStock === 0 && bStock !== 0) return  1; // a আগে
+      if (aStock !== 0 && bStock === 0) return -1;  // b আগে
+      return 0; // সমান হলে অবস্থান ঠিক রাখো
+    })
+    .map(p => ({
+      image: p.image,
+      name: p.name,
+      qty: p.stock,
+      id: p.id
+    }));
 });
 
 // Modal logic
-const selectedProduct = ref({ name: '', price: 0, qty: 1 });
+const selectedProduct = ref({ name: '', price: 0, qty: 1,   ManufectureDate: '',
+  ValidateTime: '',
+  ExpaireDate: '' });
+
+// Component লোড হলে আজকের তারিখ বসানো
+onMounted(() => {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  const todayStr = `${year}-${month}-${day}`
+
+  selectedProduct.value.ManufectureDate = todayStr
+  selectedProduct.value.ExpaireDate = todayStr
+})
+
+// ValidateTime এর সাথে Manufacture Date যোগ করে ExpaireDate auto-calculate
+watch(
+  () => [selectedProduct.value.ManufectureDate, selectedProduct.value.ValidateTime],
+  ([manuDate, validateMonth]) => {
+    if (manuDate && validateMonth) {
+      const d = new Date(manuDate)
+      d.setMonth(d.getMonth() + parseInt(validateMonth))
+      const year = d.getFullYear()
+      const month = String(d.getMonth() + 1).padStart(2, '0')
+      const day = String(d.getDate()).padStart(2, '0')
+      selectedProduct.value.ExpaireDate = `${year}-${month}-${day}`
+    }
+    // ValidateTime না দিলে, ExpaireDate user manually দিতে পারবে
+  }
+)
+
 
 
 
 const showModal = ref(false); // Control modal visibility
 
 function openCustomizationModal(productId) {
-  const product = props.products.find(p => p.id === productId);
-  if (product) {
-    selectedProduct.value = { ...product, qty: 1 };
-    showModal.value = true;
-  }
+    const product = props.products.find(p => p.id === productId);
+    if (product) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const todayStr = `${year}-${month}-${day}`;
+
+        selectedProduct.value = { ...product,
+            qty: 1,
+            ManufectureDate: todayStr,
+            ExpaireDate: todayStr,
+            ValidateTime: ''
+
+        };
+        showModal.value = true;
+    }
+
+
+
 }
 
 function closeModal() {
@@ -129,38 +180,23 @@ function closeModal() {
 }
 
 function addProductToInvoice() {
-  const newProduct = {
-    name: selectedProduct.value.name,
-    qty: selectedProduct.value.qty,
-    purchase_price: selectedProduct.value.price,
-    total: selectedProduct.value.qty * selectedProduct.value.price,
-    product_id: selectedProduct.value.id,
-  };
-
-  emit('add-to-invoice', newProduct);
-  closeModal(); // Hide modal
+  console.log("✅ addProductToInvoice called", selectedProduct.value);
+  const p = selectedProduct.value;
+  emit("add-to-invoice", {
+    name: p.name,
+    qty: p.qty,
+    purchase_price: p.price,
+    total: p.qty * p.price,
+    product_id: p.id,
+    ManufectureDate: p.ManufectureDate,
+    ExpaireDate: p.ExpaireDate
+  });
+  closeModal();
 }
+
+
 </script>
 
 <style scoped>
-.custom-modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1050;
-}
 
-.custom-modal {
-  background: white;
-  border-radius: 6px;
-  padding: 20px;
-  max-width: 500px;
-  width: 100%;
-}
 </style>

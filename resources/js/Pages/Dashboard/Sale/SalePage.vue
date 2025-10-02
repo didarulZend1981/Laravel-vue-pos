@@ -50,16 +50,47 @@ const productHeader = [
 
 
 const productItems = computed(() => {
-    return products.map((item) => ({
-        image: item.products?.image || '',
-        name: item.products?.name || 'No name',
-        stock: item.stock_qty,
-        price: item.purchase_price,
-        id: item.id,
-        product_id: item.product_id,
-    }));
+  // Step 1: স্টক থাকা প্রোডাক্ট এবং expiry_date অনুযায়ী sort করা
+  const filteredProducts = products
+    .filter(item => (item.stock_qty ?? 0) > 0)
+    .sort((a, b) => {
+      const aDate = new Date(a.expiry_date);
+      const bDate = new Date(b.expiry_date);
+      return aDate - bDate; // যেটার তারিখ আগে, সেটা আগে আসবে
+    });
 
+  // Step 2: ইউনিক প্রোডাক্ট তৈরি করা (product_id দিয়ে)
+  const seen = new Set();
+  const uniqueProducts = [];
+
+  for (const item of filteredProducts) {
+    if (!seen.has(item.product_id)) {
+      seen.add(item.product_id);
+      uniqueProducts.push(item);
+    }
+  }
+
+  // Step 3: uniqueProducts কে বারবার রিপিট করা যতক্ষণ না মূল filteredProducts এর সমান হয়
+  const combinedList = [];
+  const totalLength = filteredProducts.length;
+  const uniqueLength = uniqueProducts.length;
+
+  for (let i = 0; i < totalLength; i++) {
+    combinedList.push(uniqueProducts[i % uniqueLength]);
+  }
+
+  // Step 4: ফাইনাল ফরম্যাটে রূপান্তর
+  return combinedList.map((item) => ({
+    image: item.products?.image || '',
+    name: item.products?.name || 'No name',
+    stock: item.stock_qty,
+    price: item.purchase_price,
+    id: item.id,
+    product_id: item.product_id,
+    expiry_date: item.expiry_date,
+  }));
 });
+
 
 // Search functionality
 const customerSearchValue = ref("");
@@ -81,6 +112,7 @@ function pickProduct(productId) {
     const product = products.find(prod => prod.id === productId);
     if (product) {
         selectedProduct.value = { ...product, qty: 1 };
+
 
         $('#productCustomization').modal('show');
     }
@@ -456,32 +488,42 @@ async function generateInvoice() {
                 </div>
                 <div class="modal-body">
                     <form id="invoiceForm" @submit.prevent="addProductToInvlist()">
-                        <div class=" mb-3">
-                            <label class="form-label">Product name</label>
-                            <input type="text" class="form-control" :value="selectedProduct.products?.name || ''"
+                        <div class="mb-3 stock-expiry">
+                            <label class="form-label abel-fixed">Name</label>
+                            <input type="text" class="form-control input-flex" :value="selectedProduct.products?.name || ''"
                             placeholder="Product Name" readonly />
                         </div>
 
-                        <div class=" mb-3">
-                            <label class="form-label">Product origingal price</label>
-                            <input type="number" class="form-control" v-model="selectedProduct.purchase_price"
+                        <div class="mb-3 stock-expiry">
+                            <label class="form-label abel-fixed">Purchase price</label>
+                            <input type="number" class="form-control input-flex" v-model="selectedProduct.purchase_price"
                                 placeholder="Product origingal price" readonly />
                         </div>
 
-                        <div class=" mb-3">
-                            <label class="form-label">Product sale price for customer</label>
-                            <input type="number" class="form-control" v-model.number="selectedProduct.sale_price"
-                              
+                        <div class="mb-3 stock-expiry">
+                            <label class="form-label label-fixed">Sale price</label>
+                            <input type="number" class="form-control input-flex" v-model.number="selectedProduct.sale_price"
+
                               placeholder="Sale price" />
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Product quantity</label>
-                            <input type="number" class="form-control" v-model="selectedProduct.qty"
-                                @input="checkQty"
-                                min="1"
-                               placeholder="Quantity" />
-                                <p>Available Stock: {{ selectedProduct.stock_qty }}</p>
+                            <div class="stock-expiry">
+                                    <label class="form-label label-fixed">Quantity</label>
+                                    <input type="number" class="form-control input-flex" v-model="selectedProduct.qty"
+                                    @input="checkQty"
+                                    min="1"
+                                    placeholder="Quantity" />
+                            </div>
+
+
+
+
+                               <div class="stock-expiry">
+                                    <p>Available Stock: {{ selectedProduct.stock_qty }}</p>
+                                    <p>Expiry Date: {{ selectedProduct.expiry_date }}</p>
+                               </div>
+
                         </div>
 
                         <div class="d-flex justify-content-end">
@@ -527,6 +569,23 @@ async function generateInvoice() {
     width: 70%;
     white-space: normal;
 }
+
+.stock-expiry {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+
+
+.label-fixed {
+  width: 100px;
+}
+
+.input-flex {
+  width: 300px;
+}
+
 </style>
 
 

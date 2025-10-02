@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchaseInvoiceProducts extends Model
 {
-    protected $fillable = ['purchase_invoice_id', 'product_id', 'user_id', 'qty','stock_qty', 'purchase_price','created_at'];
+    protected $fillable = ['purchase_invoice_id', 'product_id', 'user_id', 'qty','stock_qty', 'purchase_price','manufacture_date','expiry_date','created_at'];
 
     public function products()
     {
@@ -14,4 +14,8 @@ class PurchaseInvoiceProducts extends Model
     }
 
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
+    public function purchaseInvoice(){
+         return $this->belongsTo(PurchaseInvoice::class, 'purchase_invoice_id');
+    }
 }

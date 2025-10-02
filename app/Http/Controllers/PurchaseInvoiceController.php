@@ -103,6 +103,8 @@ class PurchaseInvoiceController extends Controller
                     'qty' => $product['qty'],
                     'stock_qty' => $product['qty'],
                     'purchase_price' => $product['purchase_price'],
+                    'manufacture_date' => $product['ManufectureDate'],
+                    'expiry_date' => $product['ExpaireDate'],
                     'created_at' => $created_at,
                 ]);
 
