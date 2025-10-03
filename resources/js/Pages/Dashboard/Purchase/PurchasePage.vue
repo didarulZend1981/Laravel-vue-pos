@@ -119,7 +119,7 @@ async function generateInvoice() {
                     purchase_date: selectedDate.value
             };
 
-            
+            console.log("Invoice Data Value: ", invoiceData.value);
 
             // Send the invoice data to the server
             const response = await axios.post(route('create.purchase.invoice'), data);
@@ -224,6 +224,7 @@ const pickSupplier = (id) => {
                                     <tr>
                                         <th>Name</th>
                                         <th>Qty</th>
+                                        <th>Sale Price</th>
                                         <th>TK</th>
                                         <th>Action</th>
                                     </tr>

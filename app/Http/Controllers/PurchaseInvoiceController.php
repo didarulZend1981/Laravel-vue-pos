@@ -38,8 +38,8 @@ class PurchaseInvoiceController extends Controller
 
     //=======================create purchase invoice=========================//
     public function createPurchaseInvoice(Request $request){
-         DB::beginTransaction();
-        // dd($request->all());
+        DB::beginTransaction();
+
 
         try {
             $user_id = $request->header('id');
@@ -103,6 +103,7 @@ class PurchaseInvoiceController extends Controller
                     'qty' => $product['qty'],
                     'stock_qty' => $product['qty'],
                     'purchase_price' => $product['purchase_price'],
+                    'sale_price' => $product['sale_price'],
                     'manufacture_date' => $product['ManufectureDate'],
                     'expiry_date' => $product['ExpaireDate'],
                     'created_at' => $created_at,

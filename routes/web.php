@@ -29,6 +29,7 @@ Route::get('/Waste', [WasteProductController::class, 'moveExpiredToWaste'])->nam
 
 Route::get('/AllWaste', [WasteProductController::class, 'allWaste'])->name('allWaste');
 
+
 //======================Registration Management=====================//
 Route::get('/sign-up', [AuthController::class, 'showSignUp'])->name('signup.page');
 Route::post('/registration', [AuthController::class, 'signUp'])->name('signup');
@@ -144,6 +145,7 @@ Route::group(['prefix' => '/report', 'middleware' => tokenVerificationMiddleware
 Route::group(['prefix' => '/waste', 'middleware' => tokenVerificationMiddleware::class], function () {
     Route::get('/', [WasteProductController::class, 'allWaste'])->name('waste.page');
     Route::post('/refund', [WasteProductController::class, 'wasteProductRefound'])->name('waste.refund');
+    Route::post('/damage', [WasteProductController::class, 'damageProduct'])->name('waste.damage');
 
 });
 //======================Dashboard Management=====================//

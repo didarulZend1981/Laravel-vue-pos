@@ -1,7 +1,7 @@
 <script setup>
 import DashboardLayout from "@/Layouts/DashboardLayout.vue";
 import { ref, computed,onMounted } from "vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import { Head, Link, usePage,useForm } from "@inertiajs/vue3";
 import axios from "axios";
 import Loader from "@/Components/Loader/Loader.vue";
 import SupplierTableComponent from "@/Components/Supplier/SupplierTableComponent.vue";
@@ -113,7 +113,7 @@ function pickProduct(productId) {
     if (product) {
         selectedProduct.value = { ...product, qty: 1 };
 
-
+        console.log("testiong=================================",selectedProduct.value)
         $('#productCustomization').modal('show');
     }
 }
@@ -134,8 +134,12 @@ function pickProduct(productId) {
      // checkSalePrice validation
 
 
-// Add product to invoice list
-function addProductToInvlist() {
+
+
+
+function  addProductToInvlist(event) {
+    event.preventDefault(); // prevent form submission
+
     const newProduct = {
         name: selectedProduct.value.products?.name || 'No name',
         qty: selectedProduct.value.qty,
@@ -275,6 +279,103 @@ async function generateInvoice() {
         loading.value = false;
     }
 }
+
+
+
+
+
+
+
+// function demageProduct(event) {
+//     event.preventDefault();
+//     // const product_id=selectedProduct.value.product_id
+//     const data = {
+//             product_id: selectedProduct.value.product_id,
+//             waste_qty: selectedProduct.value.stock_qty,
+//             purchase_price: selectedProduct.value.purchase_price,
+//             case: "borken",
+//             purchase_invoice_id: selectedProduct.value.purchase_invoice_id,
+//             refound: 0,
+//     };
+//     // console.log("tesrtt==data=============================================",data)
+//     // console.log("tesrtt=============================================",product_id)
+//      const response = await axios.post('/waste/damage', data);
+
+//             if (response.data.status === true) {
+//                 successToast(response.data.message);
+//                 setTimeout(() => {
+//                     window.location.href = "/waste/";
+//                 }, 1000);
+//             } else {
+//                 errorToast('error');
+//             }
+
+
+
+
+//     successToast("Damage product added to the list");
+// }
+
+
+
+
+async function demageProduct(event) {
+    event.preventDefault();
+
+
+    try {
+        loading.value = true;
+
+
+            const form = useForm({
+                id: selectedProduct.value.id,
+                product_id: selectedProduct.value.product_id,
+                waste_qty: selectedProduct.value.qty,
+                purchase_price: selectedProduct.value.purchase_price,
+                case: "broken",
+                purchase_invoice_id: selectedProduct.value.purchase_invoice_id,
+                refound: false
+            });
+
+            form.post('/waste/damage', {
+            onSuccess: () => {
+                console.log("Damage recorded");
+                $('#productCustomization').modal('hide');
+            },
+            onError: (errors) => {
+                console.error("Validation failed", errors);
+            }
+            });
+
+
+
+
+     } catch (error) {
+        errorToast('An error occurred while creating the invoice.');
+    } finally {
+        loading.value = false;
+    }
+
+    $('#productCustomization').modal('hide');
+
+
+    // try {
+    //     const response = await axios.post(route('waste'), data);
+
+    //     // if (response.data.status === true) {
+    //     //     successToast(response.data.message);
+    //     //     setTimeout(() => {
+    //     //         window.location.href = "/waste/";
+    //     //     }, 1000);
+    //     // } else {
+    //     //     errorToast('Error: ' + (response.data.message || 'Unknown error'));
+    //     // }
+    // } catch (error) {
+    //     // console.error("Error while submitting damaged product:", error);
+    //     // errorToast('Request failed: ' + (error.response?.data?.message || error.message));
+    // }
+}
+
 </script>
 
 <template>
@@ -487,7 +588,8 @@ async function generateInvoice() {
                     <h5 class="modal-title">Product for invoice</h5>
                 </div>
                 <div class="modal-body">
-                    <form id="invoiceForm" @submit.prevent="addProductToInvlist()">
+                    <!-- <form id="invoiceForm" @submit.prevent="addProductToInvlist()"> -->
+                    <form id="invoiceForm">
                         <div class="mb-3 stock-expiry">
                             <label class="form-label abel-fixed">Name</label>
                             <input type="text" class="form-control input-flex" :value="selectedProduct.products?.name || ''"
@@ -526,13 +628,27 @@ async function generateInvoice() {
 
                         </div>
 
-                        <div class="d-flex justify-content-end">
+                        <div class="d-flex justify-content-between">
                             <div>
                                 <button id="productCustomizationBtnCls" type="button" class="btn btn-outline-info mr-3"
                                     data-dismiss="modal" aria-label="Close">Cancel</button>
                             </div>
                             <div>
-                                <button type="submit" class="btn btn-info">Add</button>
+                                <button type="submit" class="btn btn-info" @click="addProductToInvlist($event)">Add
+
+
+                                </button>
+                                <!-- <button type="submit" class="btn btn-info">Add
+
+
+                                </button> -->
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-info" @click="demageProduct($event)">demage
+
+
+
+                                </button>
                             </div>
                         </div>
                     </form>

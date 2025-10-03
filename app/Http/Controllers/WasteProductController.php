@@ -239,5 +239,49 @@ class WasteProductController extends Controller
 
         }
 
+        public function damageProduct(Request $request){
+            // dd($request->all());
+
+
+            // 2. waste_products এ insert
+                    WasteProduct::create([
+                        'product_id' => $request->input('product_id'),
+                        'waste_qty' => $request->input('waste_qty'),
+                        'purchase_price' =>$request->input('purchase_price'),
+                        'case' => $request->input('case'),
+                        'purchase_invoice_id' => $request->input('purchase_invoice_id'),
+                        'refound' => 0,
+                    ]);
+
+                    // // 3. purchase_invoice_products এর stock_qty update
+                        $qtyToReduce = $request->input('waste_qty');
+                        $productStock = PurchaseInvoiceProducts::find($request->input('id'));
+
+                        $productStock->stock_qty -= $qtyToReduce;
+                        $productStock->save();
+
+                    // // 4. products টেবিল থেকে product বের করে stock update করো
+                    $productStock = Product::find($request->input('product_id'));
+                    if ($productStock) {
+                        $productStock->stock -= $qtyToReduce;
+                        if ($productStock->stock < 0) $productStock->stock = 0;
+                        $productStock->save();
+                    }
+
+
+                     return Inertia::render('Dashboard/Waste/WastePage', [
+                        'wasteProduct' => $this->getWasteProducts(),
+                        'message' => 'Expired products till now.',
+                    ]);
+
+        }
+
+
+
+
+
+
+
+
 
 }

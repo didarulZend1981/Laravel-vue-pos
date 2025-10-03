@@ -48,6 +48,7 @@
             :fields="[
                 { label: 'Product Name', model: 'name', readonly: true },
                 { label: 'Price', model: 'price', type: 'number' },
+                 { label: 'sale_price', model: 'sale_price', type: 'number' },
                 { label: 'Qty', model: 'qty', type: 'number' },
                 { label: 'Manufacture Date', model: 'ManufectureDate', type: 'date' },
                 { label: 'Validate Time', model: 'ValidateTime', type: 'number' },
@@ -115,7 +116,7 @@ const productItems = computed(() => {
 });
 
 // Modal logic
-const selectedProduct = ref({ name: '', price: 0, qty: 1,   ManufectureDate: '',
+const selectedProduct = ref({ name: '', price: 0,sale_price: 0, qty: 1,   ManufectureDate: '',
   ValidateTime: '',
   ExpaireDate: '' });
 
@@ -165,7 +166,8 @@ function openCustomizationModal(productId) {
             qty: 1,
             ManufectureDate: todayStr,
             ExpaireDate: todayStr,
-            ValidateTime: ''
+            ValidateTime: '',
+            sale_price:''
 
         };
         showModal.value = true;
@@ -185,6 +187,7 @@ function addProductToInvoice() {
   emit("add-to-invoice", {
     name: p.name,
     qty: p.qty,
+    sale_price:p.sale_price,
     purchase_price: p.price,
     total: p.qty * p.price,
     product_id: p.id,
