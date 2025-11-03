@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\PurchaseInvoiceProducts;
+use App\Models\SaleInvoiceProducts;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,6 +12,94 @@ use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
+
+    // ===================== using open summery ====================
+
+        public function getOpening($from, $modelClass = \App\Models\PurchaseInvoiceProducts::class, $qty, $purchase_price){
+                $openingPurchases = $modelClass::where('created_at', '<', $from)->get();
+
+                $openingPurchaseQty = $openingPurchases->sum($qty);
+
+                $openingPurchaseAmount = $openingPurchases->sum(function ($item) use ($qty, $purchase_price) {
+                    return $item->$qty * $item->$purchase_price;
+                });
+
+                return [
+                    'qty' => $openingPurchaseQty,
+                    'amount' => $openingPurchaseAmount,
+                ];
+         }
+
+          public function pofitLost($from, $to){
+            $startDate = $from;
+            $endDate =$to;
+
+            // === Opening Balance ===
+            $openingPurchase = $this->getOpening($startDate, PurchaseInvoiceProducts::class, 'qty', 'purchase_price');
+            $openingPurchaseQty = $openingPurchase['qty'];
+            $openingPurchaseAmount = $openingPurchase['amount'];
+
+            $openingSales = $this->getOpening($startDate, SaleInvoiceProducts::class, 'qty', 'sale_price');
+            $openingSaleQty = $openingSales['qty'];
+            $openingSaleAmount = $openingSales['amount'];
+
+            $openingQty = $openingPurchaseQty - $openingSaleQty;
+            $openingValue = $openingPurchaseAmount - $openingSaleAmount;
+
+            // === Period Purchases ===
+            $periodPurchase = PurchaseInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('SUM(qty) as total_qty, SUM(qty * purchase_price) as total_amount')
+                ->first();
+
+            $periodPurchaseQty = $periodPurchase->total_qty ?? 0;
+            $periodPurchaseAmount = $periodPurchase->total_amount ?? 0;
+
+            // === Period Sales ===
+            $periodSale = SaleInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('
+                    SUM(qty) as total_qty,
+                    SUM(qty * sale_price) as total_amount,
+                    SUM(qty * (sale_price - rate)) as profit_amount
+                ')
+                ->first();
+
+            $periodSaleQty = $periodSale->total_qty ?? 0;
+            $periodSaleAmount = $periodSale->total_amount ?? 0;
+            $periodSaleAmountProfit = $periodSale->profit_amount ?? 0;
+
+            // === Closing ===
+            $closingQty = $openingQty + $periodPurchaseQty - $periodSaleQty;
+            $closingValue = $openingValue + $periodPurchaseAmount - $periodSaleAmount;
+
+            $totalPurchaseQty = $openingPurchaseQty + $periodPurchaseQty;
+            $totalPurchaseAmount = $openingPurchaseAmount + $periodPurchaseAmount;
+
+            $profitOrLoss = $periodSaleAmountProfit;
+
+            // === Return Summary ===
+            return [
+                'opening_qty' => $openingQty,
+                'opening_value' => round($openingValue, 2),
+
+                'period_purchase_qty' => $periodPurchaseQty,
+                'period_purchase_amount' => round($periodPurchaseAmount, 2),
+
+                'period_sale_qty' => $periodSaleQty,
+                'period_sale_amount' => round($periodSaleAmount, 2),
+
+                'total_purchase_qty' => $totalPurchaseQty,
+                'total_purchase_amount' => round($totalPurchaseAmount, 2),
+
+                'closing_qty' => $closingQty,
+                'closing_value' => round($closingValue, 2),
+
+                'profit_or_loss' => round($profitOrLoss, 2),
+            ];
+        }
+
+
+
+
     function getStockReport($from, $to){
             $report = Product::with(['purchases', 'sales'])->get()->map(function ($product) use ($from, $to) {
 
@@ -58,6 +148,10 @@ class StockController extends Controller
                 ->whereBetween('created_at', [$from, $to])
                 ->sum(DB::raw('qty * sale_price'));
 
+            $saleProfit = $product->sales()
+                ->whereBetween('created_at', [$from, $to])
+                ->sum(DB::raw('qty * (sale_price - rate)'));
+
             $salePurchaseBalance = $product->sales()
                 ->whereBetween('created_at', [$from, $to])
                 ->sum(DB::raw('qty * rate'));
@@ -67,7 +161,7 @@ class StockController extends Controller
             // -----------------------------
             $closingQty = $openingQty + $purchaseQty - $saleQty;
             // $closingBalance = $openingBalance + $purchaseBalance - $saleBalance;
-            $closingBalance = $openingBalance + $purchaseBalance - $salePurchaseBalance;
+            $closingBalance = $openingBalance + $purchaseBalance -$saleBalance;
 
             // -----------------------------
             // 5️⃣ Return Report Array
@@ -83,6 +177,8 @@ class StockController extends Controller
                 'sale_balance' => $saleBalance,
                 'closing_qty' => $closingQty,
                 'closing_balance' => $closingBalance,
+                'profit' => $saleProfit,
+                'profit_percen' => $salePurchaseBalance != 0 ? ($saleProfit / $salePurchaseBalance) * 100 : 0,
             ];
         })  ->sortBy(function ($item) {
         $allZero = (
@@ -93,10 +189,13 @@ class StockController extends Controller
             $item['sale_qty'] == 0 &&
             $item['sale_balance'] == 0 &&
             $item['closing_qty'] == 0 &&
-            $item['closing_balance'] == 0
+            $item['closing_balance'] == 0 &&
+            $item['profit'] == 0 &&
+            $item['profit_percen'] == 0
         );
         return $allZero ? 1 : 0; // 0 মানে আগে, 1 মানে পরে
     })->values();
+
 
         return $report;
     }
@@ -110,6 +209,7 @@ class StockController extends Controller
 
 
         $report =$this->getStockReport($from, $to);
+        $reportSummaery =$this->pofitLost($from, $to);
 
 
 
@@ -117,6 +217,7 @@ class StockController extends Controller
 
         return Inertia::render('Dashboard/Stock/StockPage', [
             'report' => $report,
+            'reportSummaery' => $reportSummaery,
             'stockDateFrom' => $from->toDateString(),
             'stockDateTo' => $to->toDateString(),
         ]);
@@ -130,7 +231,13 @@ class StockController extends Controller
         $defaultFrom = $now->copy()->startOfMonth()->startOfDay();
         $defaultTo = $now->copy()->endOfDay();
 
+//  $startDate = Carbon::create(2025, 9, 1)->startOfDay();
+//            $endDate = Carbon::create(2025, 10, 30)->endOfDay();
 
+
+//         $from = $startDate;
+
+//         $to = $endDate;
 
 
         $from = $request->stockDateFrom
@@ -147,12 +254,14 @@ class StockController extends Controller
 
 
         $report =$this->getStockReport($from, $to);
+        $reportSummaery =$this->pofitLost($from, $to);
 
         // return Inertia::render('Dashboard/Stock/StockPage', ['report' => $report]);
 
 
         return Inertia::render('Dashboard/Stock/StockPage', [
             'report' => $report,
+            'reportSummaery' => $reportSummaery,
             'stockDateFrom' => $from->toDateString(),
             'stockDateTo' => $to->toDateString(),
         ]);

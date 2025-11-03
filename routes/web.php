@@ -25,10 +25,15 @@ Route::get('/', function () {
 
 
 });
-Route::get('/Waste', [WasteProductController::class, 'moveExpiredToWaste'])->name('west');
+// Route::get('/Waste', [WasteProductController::class, 'moveExpiredToWaste'])->name('west');
 
-Route::get('/AllWaste', [WasteProductController::class, 'allWaste'])->name('allWaste');
 
+
+//  Route::get('/AllWaste', [WasteProductController::class, 'allWaste'])->name('allWaste');
+
+
+Route::get('/product-profit-report', [WasteProductController::class, 'productProfitReport']);
+Route::get('/pofitLost', [WasteProductController::class, 'pofitLost'])->name('pofitLost');
 
 //======================Registration Management=====================//
 Route::get('/sign-up', [AuthController::class, 'showSignUp'])->name('signup.page');
@@ -144,6 +149,7 @@ Route::group(['prefix' => '/report', 'middleware' => tokenVerificationMiddleware
 //========================Waste Management=====================//
 Route::group(['prefix' => '/waste', 'middleware' => tokenVerificationMiddleware::class], function () {
     Route::get('/', [WasteProductController::class, 'allWaste'])->name('waste.page');
+    Route::get('/Waste', [WasteProductController::class, 'moveExpiredToWaste'])->name('waste.move');
     Route::post('/refund', [WasteProductController::class, 'wasteProductRefound'])->name('waste.refund');
     Route::post('/damage', [WasteProductController::class, 'damageProduct'])->name('waste.damage');
 

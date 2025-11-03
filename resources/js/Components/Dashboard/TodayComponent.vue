@@ -17,7 +17,7 @@ const todaysAccPayableAmount = page.props.todaysAccPayableAmount || 0;
     <!-- Daily business status -->
     <div style="border: 1px solid #81ecff;">
         <div class="p-2 mb-2 d-flex justify-content-between" style="background: #dcf9fe;">
-            <h5 class="text-info font-weight-bold"> Today's Business Status </h5>
+            <h5 class="text-info font-weight-bold"> Today's Business Status  </h5>
             <p class="text-info">{{ currentDate }}</p>
         </div>
         <div class="row p-2">

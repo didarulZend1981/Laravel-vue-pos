@@ -14,6 +14,7 @@ const { props } = usePage();
 const customers = props.customers || [];
 // const products = props.products || [];
 const products = props.purches || [];
+// console.log("purches=======",products)
 const currentDate = new Date().toISOString().split("T")[0];
 
 // তারিখ সংরক্ষণ

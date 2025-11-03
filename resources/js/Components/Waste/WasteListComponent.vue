@@ -47,7 +47,7 @@ const searchField = ref(["product_name"]);
 const handleWasteProductClick = () => {
     loading.value = true;
 
-    router.get(route('west'), {}, {
+    router.get(route('waste.move'), {}, {
         preserveScroll: true,
         onFinish: () => {
             loading.value = false;

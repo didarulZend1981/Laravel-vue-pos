@@ -13,5 +13,9 @@ protected $fillable = ['sale_invoice_id', 'user_id', 'product_id', 'product_name
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function saleInvoice()
+{
+    return $this->belongsTo(SaleInvoice::class, 'sale_invoice_id');
+}
     protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 }

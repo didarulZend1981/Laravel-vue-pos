@@ -23,6 +23,7 @@ class SaleInvoiceController extends Controller
         $products = Product::where('user_id', $user_id)->where('stock', '>', 0)->orderByDesc('id')->get();
         $purches = PurchaseInvoiceProducts::with('products:id,name,image')->where('user_id', $user_id)->get();
 
+        // dd($purches);
 
         // dd($purches);
         // return response()->json([

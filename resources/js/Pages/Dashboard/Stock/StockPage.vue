@@ -49,7 +49,7 @@
                                         </div>
 
                                     </form>
-        </div>
+                                 </div>
                             </div>
                         </div>
 
@@ -58,6 +58,35 @@
 
 
 
+
+
+
+                      <div class="mb-4" style="border: 1px solid #81ecff;">
+                        <div class="card-header p-2 mb-4 d-flex justify-content-between">
+                            <h5 class="text-info font-weight-bold"> Today's Business Status  </h5>
+                            <p class="text-info">
+
+                                <strong>From Date:</strong> {{ stockDateFrom }}
+                                <strong>To Date:</strong> {{ stockDateTo }}
+                            </p>
+                        </div>
+                        <div class="row  card-body">
+
+
+
+                                     <StatCard title="Opening" :quantity="openingQty" :value="openingValue" symbol="৳" />
+                                     <StatCard title="Purchase" :quantity="periodPurchase_qty" :value="periodPurchaseAmount" symbol="৳" />
+                                     <StatCard title="Total" :quantity="totalPurchaseQty" :value="totalPurchaseAmount" symbol="৳" />
+                                     <StatCard title="Sale" :quantity="periodSaleQty" :value="periodSaleAmount" symbol="৳" />
+
+                                     <StatCard title="Closing" :quantity="closingQty" :value="closingValue" symbol="৳" />
+                                     <StatCard title="Profit/Loss" :quantity="periodSaleQty" :value="profitOrLoss" symbol="৳" />
+
+
+
+
+                         </div>
+                    </div>
 
 
              <div class="card shadow mb-4 h-100">
@@ -102,12 +131,28 @@
 
 
 <script setup>
+
+import StatCard from '@/Components/Card/StatCard.vue';
 import DashboardLayout from '@/Layouts/DashboardLayout.vue';
 import { Head, useForm, router, usePage } from '@inertiajs/vue3';
 import { ref,computed } from "vue";
 
 
 const page = usePage()
+const reportSummaery = page.props.reportSummaery || 0;
+const openingQty=reportSummaery.opening_qty || 0;
+const openingValue=reportSummaery.opening_value || 0;
+const periodPurchase_qty=reportSummaery.period_purchase_qty || 0;
+const periodPurchaseAmount=reportSummaery.period_purchase_amount || 0;
+const periodSaleQty=reportSummaery.period_sale_qty || 0;
+const periodSaleAmount=reportSummaery.period_sale_amount || 0;
+const totalPurchaseQty=reportSummaery.total_purchase_qty || 0;
+const totalPurchaseAmount=reportSummaery.total_purchase_amount || 0;
+const closingQty=reportSummaery.closing_qty || 0;
+const closingValue=reportSummaery.closing_value || 0;
+const profitOrLoss=reportSummaery.profit_or_loss || 0;
+
+
 
 
 const stockReportForm = useForm({

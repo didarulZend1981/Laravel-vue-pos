@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceProducts;
+use App\Models\SaleInvoice;
+use App\Models\SaleInvoiceProducts;
 use App\Models\WasteProduct;
 use Carbon\Carbon;
 use Exception;
@@ -178,7 +180,7 @@ class WasteProductController extends Controller
 
 
         public function allWaste() {
-                // dd($results);
+                // test dd($results);
                 return Inertia::render('Dashboard/Waste/WastePage', [
                     'wasteProduct' =>  $this->getWasteProducts(),
                 ]);
@@ -275,6 +277,302 @@ class WasteProductController extends Controller
                     ]);
 
         }
+
+// ===================== using open summery ====================
+
+        public function getOpening($startDate, $modelClass = \App\Models\PurchaseInvoiceProducts::class, $qty, $purchase_price){
+                $openingPurchases = $modelClass::where('created_at', '<', $startDate)->get();
+
+                $openingPurchaseQty = $openingPurchases->sum($qty);
+
+                $openingPurchaseAmount = $openingPurchases->sum(function ($item) use ($qty, $purchase_price) {
+                    return $item->$qty * $item->$purchase_price;
+                });
+
+                return [
+                    'qty' => $openingPurchaseQty,
+                    'amount' => $openingPurchaseAmount,
+                ];
+         }
+
+
+
+
+
+        //  public function pofitLost(){
+
+        //    $startDate = Carbon::create(2025, 10, 1)->startOfDay();
+        //    $endDate = Carbon::create(2025, 10, 30)->endOfDay();
+
+        //     // === Opening Balance (startDate এর আগ পর্যন্ত) ===
+
+        //     $openingPurchase=$this->getOpening($startDate, \App\Models\PurchaseInvoiceProducts::class, 'qty', 'purchase_price');
+        //     $openingPurchaseQty = $openingPurchase['qty'];
+        //     $openingPurchaseAmount = $openingPurchase['amount'];
+        //     $openingSales=$this->getOpening($startDate, \App\Models\SaleInvoiceProducts::class, 'qty', 'sale_price');
+        //     $openingSaleQty = $openingSales['qty'];
+        //     $openingSaleAmount = $openingSales['amount'];
+
+        //     $openingQty = $openingPurchaseQty - $openingSaleQty;
+
+
+        //     $openingValue = $openingPurchaseAmount -  $openingSaleAmount;
+
+
+
+        //     // === Period Purchases ===
+        //     $periodPurchases = PurchaseInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])->get();
+        //     $periodPurchaseQty = $periodPurchases->sum('qty');
+        //     $periodPurchaseAmount = $periodPurchases->sum(function ($item) {
+        //         return $item->stock_qty * $item->purchase_price;
+        //     });
+
+        //     // === Period Sales ===
+        //     $periodSales = SaleInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])->get();
+
+
+        //     // dd($periodSales);
+        //     $periodSaleQty = $periodSales->sum('qty');
+        //     $periodSaleAmount = $periodSales->sum(function ($item) {
+        //         return $item->qty * $item->sale_price;
+        //     });
+
+        //     $periodSaleAmountProfit = $periodSales->sum(function ($item) {
+        //         return $item->qty * ($item->sale_price-$item->rate);
+        //     });
+
+        //     // === Closing calculation ===
+        //     $closingQty = $openingQty + $periodPurchaseQty - $periodSaleQty;
+
+        //     $closingValue=  $openingValue+$periodPurchaseAmount-$periodSaleAmount;
+
+        //     $totalPurchaseQty = $openingPurchaseQty + $periodPurchaseQty;
+        //     $totalPurchaseAmount = $openingPurchaseAmount + $periodPurchaseAmount;
+
+        //     // $avgPurchasePriceClosing = $totalPurchaseQty > 0 ? ($totalPurchaseAmount / $totalPurchaseQty) : 0;
+        //     // $closingValue = $closingQty * $avgPurchasePriceClosing;
+
+        //     $profitOrLoss = ($openingValue + $periodPurchaseAmount + $periodSaleAmount)-($openingValue + $periodPurchaseAmount);
+
+
+        //     // --- Return the summary ---
+        //     return [
+        //         'opening_qty' =>  $openingQty,
+        //         'opening_value' => round($openingValue, 2),
+
+        //         'period_purchase_qty' => $periodPurchaseQty,
+        //         'period_purchase_amount' => round($periodPurchaseAmount, 2),
+        //         'period_sale_qty' => $periodSaleQty,
+        //         'period_sale_amount' => round($periodSaleAmount, 2),
+
+
+        //         'total_purchase_qty' => $totalPurchaseQty,
+        //         'total_purchase_amount' => round($totalPurchaseAmount, 2),
+
+
+        //         'closing_qty' => $closingQty,
+        //         'closing_value' => round($closingValue, 2),
+        //         'profit_or_loss' => round($periodSaleAmountProfit,2),
+        //     ];
+
+
+        //  }
+
+
+
+
+        public function pofitLost(){
+            $startDate = Carbon::create(2025, 10, 1)->startOfDay();
+            $endDate = Carbon::create(2025, 10, 30)->endOfDay();
+
+            // === Opening Balance ===
+            $openingPurchase = $this->getOpening($startDate, PurchaseInvoiceProducts::class, 'qty', 'purchase_price');
+            $openingPurchaseQty = $openingPurchase['qty'];
+            $openingPurchaseAmount = $openingPurchase['amount'];
+
+            $openingSales = $this->getOpening($startDate, SaleInvoiceProducts::class, 'qty', 'sale_price');
+            $openingSaleQty = $openingSales['qty'];
+            $openingSaleAmount = $openingSales['amount'];
+
+            $openingQty = $openingPurchaseQty - $openingSaleQty;
+            $openingValue = $openingPurchaseAmount - $openingSaleAmount;
+
+            // === Period Purchases ===
+            $periodPurchase = PurchaseInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('SUM(qty) as total_qty, SUM(qty * purchase_price) as total_amount')
+                ->first();
+
+            $periodPurchaseQty = $periodPurchase->total_qty ?? 0;
+            $periodPurchaseAmount = $periodPurchase->total_amount ?? 0;
+
+            // === Period Sales ===
+            $periodSale = SaleInvoiceProducts::whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw('
+                    SUM(qty) as total_qty,
+                    SUM(qty * sale_price) as total_amount,
+                    SUM(qty * (sale_price - rate)) as profit_amount
+                ')
+                ->first();
+
+            $periodSaleQty = $periodSale->total_qty ?? 0;
+            $periodSaleAmount = $periodSale->total_amount ?? 0;
+            $periodSaleAmountProfit = $periodSale->profit_amount ?? 0;
+
+            // === Closing ===
+            $closingQty = $openingQty + $periodPurchaseQty - $periodSaleQty;
+            $closingValue = $openingValue + $periodPurchaseAmount - $periodSaleAmount;
+
+            $totalPurchaseQty = $openingPurchaseQty + $periodPurchaseQty;
+            $totalPurchaseAmount = $openingPurchaseAmount + $periodPurchaseAmount;
+
+            $profitOrLoss = $periodSaleAmountProfit;
+
+            // === Return Summary ===
+            return [
+                'opening_qty' => $openingQty,
+                'opening_value' => round($openingValue, 2),
+
+                'period_purchase_qty' => $periodPurchaseQty,
+                'period_purchase_amount' => round($periodPurchaseAmount, 2),
+
+                'period_sale_qty' => $periodSaleQty,
+                'period_sale_amount' => round($periodSaleAmount, 2),
+
+                'total_purchase_qty' => $totalPurchaseQty,
+                'total_purchase_amount' => round($totalPurchaseAmount, 2),
+
+                'closing_qty' => $closingQty,
+                'closing_value' => round($closingValue, 2),
+
+                'profit_or_loss' => round($profitOrLoss, 2),
+            ];
+        }
+
+
+
+
+
+
+         public function productProfitReport(){
+
+           $startDate = Carbon::create(2025, 10, 1)->startOfDay();
+           $endDate = Carbon::create(2025, 10, 30)->endOfDay();
+
+            $products = Product::all(); // যদি product টেবিল থাকে
+
+            $productReports = $products->map(function ($product) use ($startDate, $endDate) {
+
+                // === Opening balance (before $startDate) ===
+                $openingPurchases = PurchaseInvoiceProducts::where('product_id', $product->id)
+                    ->where('created_at', '<', $startDate)
+                    ->get();
+
+
+                $openingPurchaseQty = $openingPurchases->sum('qty');
+                $openingPurchaseAmount = $openingPurchases->sum(function ($item) {
+                    return $item->qty * $item->purchase_price;
+                });
+
+                // === Opening Sale (before $startDate) ===
+
+                $openingSales = SaleInvoiceProducts::where('product_id', $product->id)
+                    ->where('created_at', '<', $startDate)
+                    ->get();
+
+                $openingSaleQty = $openingSales->sum('qty');
+                $openingSaleAmount = $openingSales->sum(function ($item) {
+                    return $item->qty * $item->sale_price;
+                });
+
+                $openingQty = $openingPurchaseQty - $openingSaleQty;
+                $openingValue = $openingPurchaseAmount- $openingSaleAmount;
+
+                // === Current period (between startDate and endDate PurchaseInvoiceProducts) ===
+                $periodPurchases = PurchaseInvoiceProducts::where('product_id', $product->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+
+
+                $periodPurchaseQty = $periodPurchases->sum('qty');
+                $periodPurchaseAmount = $periodPurchases->sum(function ($item) {
+                    return $item->qty * $item->purchase_price;
+                });
+                // === Current period (between startDate and endDate SaleInvoiceProducts) ===
+                $periodSales = SaleInvoiceProducts::where('product_id', $product->id)
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->get();
+
+                $periodSaleQty = $periodSales->sum('qty');
+                $periodSaleAmount = $periodSales->sum(function ($item) {
+                    return $item->qty * $item->sale_price;
+                });
+
+                 $periodSaleAmountProfit = $periodSales->sum(function ($item) {
+                    return $item->qty * ($item->sale_price-$item->rate);
+                });
+
+                  $periodSaleAmountPurches = $periodSales->sum(function ($item) {
+                    return $item->qty * $item->sale_price;
+                });
+
+                // === Closing balance ===
+                $closingQty = $openingQty + $periodPurchaseQty - $periodSaleQty;
+                $closingValue= $openingValue + $periodPurchaseAmount - $periodSaleAmount;
+
+                // For avg purchase price during current period + opening combined (weighted average)
+                $totalQty = $openingPurchaseQty + $periodPurchaseQty;
+                $totalPurchaseAmount = $openingPurchaseAmount + $periodPurchaseAmount;
+
+                $avgPurchasePriceClosing = $totalQty > 0 ? $totalPurchaseAmount / $totalQty : 0;
+                // $closingValue = $closingQty * $avgPurchasePriceClosing;
+
+                $profitOrLoss = round(($openingValue + $periodPurchaseAmount + $periodSaleAmount)-($openingValue + $periodPurchaseAmount),2);
+
+                return [
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+
+
+
+                    // opening
+                    'opening_qty' => $openingQty,
+                    'opening_value' => round($openingValue, 2),
+
+                    // period_purchase
+                    'period_purchase_qty' => $periodPurchaseQty,
+                    'period_purchase_amount' => round($periodPurchaseAmount, 2),
+
+
+                    // period_sale
+                    'period_sale_qty' => $periodSaleQty,
+                    'period_sale_amount' => round($periodSaleAmount, 2),
+
+
+                    // closing_qty
+                    'closing_qty' => $closingQty,
+                    'closing_value' => round($closingValue, 2),
+
+
+
+
+                    // 'profit_or_loss' => round(($openingValue + $periodPurchaseAmount + $periodSaleAmount)-($openingValue + $periodPurchaseAmount),2),
+                    'profit_or_loss' => round($periodSaleAmountProfit, 2),
+                    'profit_percentage' => $periodSaleAmountPurches != 0 ? round(($periodSaleAmountProfit * 100) / $periodSaleAmountPurches, 2)
+    : 0,
+
+                ];
+            });
+
+
+            dd($productReports);
+
+
+            }
+
+
+
+
+
 
 
 
